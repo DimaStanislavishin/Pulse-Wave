@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulse Wave - Пошук</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Навігація -->
+    <nav class="nav">
+        <div class="nav-brand">Pulse Wave</div>
+        <ul class="nav-list">
+            <li><a href="index.html" class="nav-link">🏠 Головна</a></li>
+            <li><a href="search.html" class="nav-link active">🔍 Пошук</a></li>
+            <li><a href="library.html" class="nav-link">📚 Бібліотека</a></li>
+        </ul>
+    </nav>
+
+    <!-- Основна сторінка -->
+    <main class="container">
+        <!-- Заголовок -->
+        <header class="header">
+            <h1>Пошук музики 🔍</h1>
+            <p>Знайди свою улюблену пісню, виконавця або подкаст</p>
+        </header>
+
+        <!-- Пошукова форма -->
+        <div class="search-box">
+            <input 
+                type="text" 
+                id="searchInput" 
+                class="search-input" 
+                placeholder="Введи назву пісні, виконавця..."
+                autocomplete="off"
+            >
+        </div>
+
+        <!-- Результати пошуку -->
+        <section class="section">
+            <h2 class="section-title">📋 Результати пошуку</h2>
+            <div id="searchResults" class="list">
+                <p class="empty-message">Введи текст для пошуку...</p>
+            </div>
+        </section>
+
+        <!-- Популярні категорії -->
+        <section class="section">
+            <h2 class="section-title">🌟 Популярні категорії</h2>
+            <div class="grid">
+                <div class="card card-clickable" onclick="searchCategory('Рок')">
+                    <div class="card-image">🎸</div>
+                    <h3>Рок</h3>
+                </div>
+                <div class="card card-clickable" onclick="searchCategory('Поп')">
+                    <div class="card-image">🎤</div>
+                    <h3>Поп</h3>
+                </div>
+                <div class="card card-clickable" onclick="searchCategory('Джаз')">
+                    <div class="card-image">🎺</div>
+                    <h3>Джаз</h3>
+                </div>
+                <div class="card card-clickable" onclick="searchCategory('Електро')">
+                    <div class="card-image">🎧</div>
+                    <h3>Електро</h3>
+                </div>
+                <div class="card card-clickable" onclick="searchCategory('Класична')">
+                    <div class="card-image">🎹</div>
+                    <h3>Класична</h3>
+                </div>
+                <div class="card card-clickable" onclick="searchCategory('Хіп-хоп')">
+                    <div class="card-image">🎙️</div>
+                    <h3>Хіп-хоп</h3>
+                </div>
+            </div>
+        </section>
+
+        <!-- Популярні виконавці -->
+        <section class="section">
+            <h2 class="section-title">⭐ Популярні виконавці</h2>
+            <div class="grid">
+                <div class="card card-clickable" onclick="searchArtist('Hyperion Dreams')">
+                    <div class="card-image">👤</div>
+                    <h3>Hyperion Dreams</h3>
+                    <p>Синтвейв артист</p>
+                </div>
+                <div class="card card-clickable" onclick="searchArtist('Synth Wave')">
+                    <div class="card-image">👤</div>
+                    <h3>Synth Wave</h3>
+                    <p>Електронна музика</p>
+                </div>
+                <div class="card card-clickable" onclick="searchArtist('Future Sound')">
+                    <div class="card-image">👤</div>
+                    <h3>Future Sound</h3>
+                    <p>Футуристична музика</p>
+                </div>
+                <div class="card card-clickable" onclick="searchArtist('Neon Vision')">
+                    <div class="card-image">👤</div>
+                    <h3>Neon Vision</h3>
+                    <p>Атмосферна музика</p>
+                </div>
+                <div class="card card-clickable" onclick="searchArtist('Cosmic Beats')">
+                    <div class="card-image">👤</div>
+                    <h3>Cosmic Beats</h3>
+                    <p>Космічний звук</p>
+                </div>
+                <div class="card card-clickable" onclick="searchArtist('Echo Valley')">
+                    <div class="card-image">👤</div>
+                    <h3>Echo Valley</h3>
+                    <p>Альтернативна музика</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <p>&copy; 2024 Pulse Wave - Музика для всіх</p>
+    </footer>
+
+    <script src="search-script.js"></script>
+</body>
+</html>
