@@ -1,0 +1,12 @@
+/* Page-specific styles for search.html */
+.glass-card{background:rgba(255,255,255,0.04);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,0.06)}
+.category-grid{gap:24px}
+/* scrollbar fallbacks for this page */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#010f1f}
+::-webkit-scrollbar-thumb{background:#273647;border-radius:10px}
+
+/* compatibility aliases to match new naming convention */
+.background-glass-card{background:rgba(255,255,255,0.04);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,0.06)}
+.background-pulse{background:linear-gradient(135deg,#6b21ff 0%,#6d32e7 50%,#00f4fe 100%)}
+.effect-pulse{box-shadow:0 0 20px rgba(207,188,255,.35)}

@@ -1,0 +1,74 @@
+/* Shared compact stylesheet extracted from inline styles */
+body{
+  font-family: 'Geist', sans-serif;
+  background-color:#051424;
+  color:#d4e4fa;
+  overflow-x:hidden;
+}
+.glass-panel,.glass-card{
+  background:rgba(1,15,31,0.65);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+}
+.pulse-gradient{background:linear-gradient(135deg,#6b21ff 0%,#6d32e7 50%,#00f4fe 100%);}
+.pulse-glow:hover{box-shadow:0 0 20px rgba(207,188,255,.35);}
+.hide-scrollbar,.no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
+.hide-scrollbar::-webkit-scrollbar, .no-scrollbar::-webkit-scrollbar{display:none}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+.category-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:24px}
+@media(min-width:768px){.category-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));}}
+/* small helpers */
+.rounded-full-clip{overflow:hidden;border-radius:9999px}
+.cursor-ghost{cursor:pointer}
+
+/* lightweight scrollbar fallback */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#010f1f}
+::-webkit-scrollbar-thumb{background:#273647;border-radius:10px}
+
+/* Short semantic aliases */
+.brand-title{font-size:1.5rem;font-weight:700;color:#6b21ff;margin:0}
+.nav-link{display:flex;align-items:center;gap:0.75rem;padding:.5rem 1rem;border-radius:.5rem;color:#d4e4fa;text-decoration:none}
+.nav-link-active{background:rgba(107,33,255,0.12);color:#e0d3ff;font-weight:600}
+.lbl-lg{font-size:1rem;font-weight:600;color:#d4e4fa}
+.body-md{font-size:0.95rem;color:#d4e4fa}
+.btn-primary{background:#6b21ff;color:#e0d3ff;padding:.5rem 1rem;border-radius:.75rem;border:none}
+.btn-outline{background:transparent;color:#d4e4fa;padding:.5rem 1rem;border:1px solid rgba(255,255,255,0.12);border-radius:.75rem}
+.button-play,.btn-primary{background:#6b21ff;color:#e0d3ff;padding:.5rem 1rem;border-radius:.75rem;border:none}
+.button-outline,.btn-outline{background:transparent;color:#d4e4fa;padding:.5rem 1rem;border:1px solid rgba(255,255,255,0.12);border-radius:.75rem}
+.button-nav,.nav-link{display:flex;align-items:center;gap:0.75rem;padding:.5rem 1rem;border-radius:.5rem;color:#d4e4fa;text-decoration:none}
+.button-nav-active,.nav-link-active{background:linear-gradient(90deg,#4b1fff 0%,#6b21ff 100%);color:#fff;font-weight:700;box-shadow:0 6px 18px rgba(107,33,255,0.18);width:100%;padding:.75rem 1rem;border-radius:10px}
+.background-glass,.glass-panel,.glass-card{background:rgba(1,15,31,0.65);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.background-pulse,.pulse-gradient{background:linear-gradient(135deg,#6b21ff 0%,#6d32e7 50%,#00f4fe 100%)}
+.effect-pulse,.pulse-glow:hover{box-shadow:0 0 20px rgba(207,188,255,.35)}
+.background-glass-card,.glass-card{background:rgba(255,255,255,0.04);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,0.06)}
+.button-pill-active,.pill-active{background:linear-gradient(90deg,#4b1fff 0%,#6b21ff 100%);color:#fff;font-weight:700;box-shadow:0 6px 18px rgba(107,33,255,0.18);padding:.75rem 1rem;border-radius:10px;transition:box-shadow .18s ease,transform .12s ease,background .12s ease}
+.button-pill-active .material-symbols-outlined,.pill-active .material-symbols-outlined{background:rgba(255,255,255,0.12);color:#fff;border-radius:8px;width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center}
+.gap-m{gap:1rem}
+.px-m{padding-left:1rem;padding-right:1rem}
+.py-s{padding-top:.375rem;padding-bottom:.375rem}
+
+/* Shared pill active/focus style (match library look) */
+.pill-active{background:linear-gradient(90deg,#4b1fff 0%,#6b21ff 100%);color:#fff;font-weight:700;box-shadow:0 6px 18px rgba(107,33,255,0.18);padding:.75rem 1rem;border-radius:10px;transition:box-shadow .18s ease,transform .12s ease,background .12s ease}
+.pill-active .material-symbols-outlined{background:rgba(255,255,255,0.12);color:#fff;border-radius:8px;width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center}
+
+/* Apply pill look on active/focus/aria-pressed states for nav links and primary/outline buttons */
+.button-nav:active, .button-nav:focus, .button-nav:focus-visible, .button-nav[aria-pressed="true"],
+.nav-link:active, .nav-link:focus, .nav-link:focus-visible, .nav-link[aria-pressed="true"],
+.button-play:active, .btn-primary:active, .button-outline:active, .btn-outline:active, button[aria-pressed="true"], a.nav-link:active {
+  background:linear-gradient(90deg,#4b1fff 0%,#6b21ff 100%);
+  color:#fff;
+  font-weight:700;
+  box-shadow:0 6px 18px rgba(107,33,255,0.18);
+}
+.button-nav:active .material-symbols-outlined, .button-nav[aria-pressed="true"] .material-symbols-outlined,
+.nav-link:active .material-symbols-outlined, .nav-link[aria-pressed="true"] .material-symbols-outlined,
+.button-play:active .material-symbols-outlined, .btn-primary:active .material-symbols-outlined, .button-outline:active .material-symbols-outlined, .btn-outline:active .material-symbols-outlined {
+  background:rgba(255,255,255,0.12);
+  color:#fff;
+}
+
+/* Ensure clickable elements don't show browser outline but still keyboard-accessible */
+.nav-link:focus{outline:none;box-shadow:0 0 0 3px rgba(107,33,255,0.12)}
+
+

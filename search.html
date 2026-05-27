@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="uk"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pulse Wave - Пошук</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&amp;family=Geist+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="index.css"/>
+<link rel="stylesheet" href="search.css"/>
+<style>
+        body {
+            font-family: 'Geist', sans-serif;
+            background-color: #131314;
+            color: #e5e2e3;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(20, 19, 20, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .pulse-glow:hover {
+            box-shadow: 0 0 20px rgba(107, 33, 255, 0.4);
+        }
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 24px;
+        }
+        @media (min-width: 768px) {
+            .category-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 24px;
+            }
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0e0e0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #353436;
+            border-radius: 4px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#6a1ffe",
+                        "on-surface": "#e5e2e3",
+                        "inverse-surface": "#e5e2e3",
+                        "surface-dim": "#131314",
+                        "secondary": "#ddfcff",
+                        "primary-container": "#6b21ff",
+                        "on-tertiary": "#5e0052",
+                        "surface": "#131314",
+                        "secondary-container": "#00f1fe",
+                        "inverse-on-surface": "#313031",
+                        "on-secondary-fixed": "#002022",
+                        "surface-container-highest": "#353436",
+                        "on-background": "#e5e2e3",
+                        "on-tertiary-fixed-variant": "#850074",
+                        "on-tertiary-fixed": "#3a0032",
+                        "surface-tint": "#cebdff",
+                        "outline-variant": "#494457",
+                        "outline": "#948da3",
+                        "tertiary-fixed-dim": "#fface7",
+                        "surface-container": "#201f20",
+                        "error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#004f54",
+                        "on-primary": "#380095",
+                        "surface-container-low": "#1c1b1c",
+                        "secondary-fixed-dim": "#00dbe7",
+                        "on-error-container": "#ffdad6",
+                        "primary": "#cebdff",
+                        "on-error": "#690005",
+                        "surface-variant": "#353436",
+                        "primary-fixed": "#e8ddff",
+                        "tertiary-container": "#af009a",
+                        "tertiary": "#fface7",
+                        "surface-bright": "#3a393a",
+                        "on-secondary-container": "#006a70",
+                        "primary-fixed-dim": "#cebdff",
+                        "tertiary-fixed": "#ffd7f0",
+                        "on-secondary": "#00363a",
+                        "surface-container-lowest": "#0e0e0f",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed-variant": "#5100cf",
+                        "secondary-fixed": "#74f5ff",
+                        "on-primary-fixed": "#20005e",
+                        "on-tertiary-container": "#ffcbec",
+                        "surface-container-high": "#2a2a2b",
+                        "on-primary-container": "#e0d3ff",
+                        "background": "#131314",
+                        "on-surface-variant": "#cbc3da"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "lg": "48px",
+                        "margin-desktop": "64px",
+                        "sm": "12px",
+                        "margin-mobile": "16px",
+                        "base": "8px",
+                        "md": "24px",
+                        "xl": "80px",
+                        "xs": "4px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Geist"],
+                        "body-md": ["Geist"],
+                        "mono-md": ["Geist Mono"],
+                        "body-lg": ["Geist"],
+                        "body-sm": ["Geist"],
+                        "headline-lg-mobile": ["Geist"],
+                        "headline-md": ["Geist"],
+                        "label-lg": ["Geist"],
+                        "headline-xl": ["Geist"],
+                        "headline-lg": ["Geist"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", {"lineHeight": "14px", "fontWeight": "500"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "mono-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "label-lg": ["14px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface min-h-screen selection:bg-primary-container selection:text-on-primary-container">
+<!-- Sidebar Navigation (Desktop) -->
+<aside class="fixed left-0 top-0 h-full w-[280px] hidden md:flex flex-col bg-surface-container shadow-xl p-gutter gap-base z-50">
+<div class="mb-lg">
+    <h1 class="brand-title">Pulse Wave</h1>
+</div>
+<nav class="flex flex-col gap-xs">
+    <a class="nav-link" href="index.html">
+        <span class="material-symbols-outlined" data-icon="home">home</span>
+        <span class="lbl-lg">Головна</span>
+    </a>
+        <a class="nav-link nav-link-active" href="search.html" aria-pressed="true">
+        <span class="material-symbols-outlined" data-icon="search" style="font-variation-settings: 'FILL' 1;">search</span>
+        <span class="lbl-lg">Пошук</span>
+    </a>
+    <a class="nav-link" href="bibly.html">
+        <span class="material-symbols-outlined" data-icon="library_music">library_music</span>
+        <span class="lbl-lg">Бібліотека</span>
+    </a>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-[280px] min-h-screen pb-32">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-40 w-full bg-surface/80 backdrop-blur-xl">
+<div class="flex justify-between items-center px-margin-mobile md:px-margin-desktop h-20 w-full mx-auto">
+<div class="flex items-center gap-md flex-1">
+<div class="relative w-full max-w-md hidden md:block">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant/30 rounded-full py-2 pl-12 pr-4 focus:ring-2 focus:ring-primary-container/50 text-body-md outline-none" placeholder="Шукайте виконавців, пісні, подкасти..." type="text"/>
+</div>
+<div class="md:hidden">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary-container">Pulse Wave</h1>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary-container transition-colors">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary-container transition-colors">settings</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container/20 cursor-pointer">
+<img alt="Налаштування профілю" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRlmMEP1qu7hoPBF6gXXFO9CYu0ROFc047cXGqAYX8KOVJ2GbbSzSxnc5M0P0EJPKmuqfwNqtDHzxohscXwk7t6RTt1IiZJD1Ez2L5IeyzElk_ypEq1GZlDiCpkRpYYV3_62DG77-BbocrDwGdLB5iNNufL5V6uNPh2nMTPfF7fsdZCpCSoBLUe9fhzzRWCxw0X7R3aNj9blodQfBsFHNm6Xb2bpRM2V9RNxPqfSRoPldV6KJX1CdTl4ULfXEiI6JQ8H-76hQ56PWZ"/>
+</div>
+</div>
+</div>
+</header>
+<div class="px-margin-mobile md:px-margin-desktop py-md flex flex-col gap-lg">
+<!-- Recent Searches Section -->
+<section>
+<div class="flex justify-between items-end mb-md">
+<h3 class="font-headline-md text-headline-md text-on-surface">Останні пошуки</h3>
+<button class="lbl-lg btn-outline">Очистити все</button>
+</div>
+<div class="flex flex-col gap-xs">
+<div class="group flex items-center justify-between p-sm hover:bg-surface-container-high rounded-lg transition-colors cursor-pointer border border-outline-variant/5">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded bg-surface-container-low flex items-center justify-center border border-outline-variant/20">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="history">history</span>
+</div>
+<div>
+<p class="lbl-lg text-on-surface">After Hours - The Weeknd</p>
+<p class="body-md text-on-surface-variant">Пісня • Синті-поп</p>
+</div>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 hover:text-error transition-all" data-icon="close" onclick="this.closest('.group').remove()">close</button>
+</div>
+<div class="group flex items-center justify-between p-sm hover:bg-surface-container-high rounded-lg transition-colors cursor-pointer border border-outline-variant/5">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full overflow-hidden border border-outline-variant/20">
+<img alt="Виконавець" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaeyJ55OnjkiuM7nspcpTA0vOaFKYt8V24qbAaxg1v3i1tVnazyYWAWhcvrU-k55cJ0YEvpNPum67GXu7F6CDQTxndKNo9nvTXOEml0R3Zrfhhz5Q31prOdhrH4_-epK0BjX46pozB0kiWdLye66GuqFb9mP_bTJJMoPIDSf_yBy11UI1BWGfgdwsep6A16hX6ADXOfV0NR1HdGALoG-ePenP8tZkMG_4pyKJN-A-OF36M9KWN8zv9WEHnQv1Y0R3rQj4f34J7Wgo-"/>
+</div>
+<div>
+<p class="lbl-lg text-on-surface">Tame Impala</p>
+<p class="body-md text-on-surface-variant">Виконавець</p>
+</div>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 hover:text-error transition-all" data-icon="close" onclick="this.closest('.group').remove()">close</button>
+</div>
+</div>
+</section>
+<!-- Categories Grid Section -->
+<section>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-md">Огляд категорій</h3>
+<div class="category-grid">
+<!-- Pop -->
+<div class="relative overflow-hidden aspect-square rounded-xl bg-primary-container p-md cursor-pointer group hover:scale-[1.02] transition-transform shadow-lg pulse-glow">
+<span class="brand-title text-on-primary font-bold relative z-10">Поп</span>
+<div class="absolute -right-4 -bottom-2 w-24 h-24 rotate-12 opacity-80 group-hover:scale-110 transition-transform">
+<img alt="Поп" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALwaiY1amN1nlulXqD1bfoR1FB9jNRWm3leAloQcP5Z2RwvVBMx4JuewWuJRxF9-EnpH9iK-1wimWMFyyfvIemgl0yajwTJmKWFprtT3vdCLA4HshAFblcDwyOVyFXW8nCTb6IziCtTXakbo8IyEkx51WvvRkSIoGTVfsUN2oxQqH0QezzmTijl2VDUt7mw6I2S9yhp69plrnotPnbY57INp2EdFB-5xXHJpVlO8P76V55bq5sMYCrs1g1VHciQUe4j3IJ_9WNi0ct"/>
+</div>
+</div>
+<!-- Rock -->
+<div class="relative overflow-hidden aspect-square rounded-xl bg-gradient-to-br from-[#ff5f6d] to-[#ffc371] p-md cursor-pointer group hover:scale-[1.02] transition-transform shadow-lg">
+<span class="font-headline-lg text-white font-bold relative z-10">Рок</span>
+<div class="absolute -right-4 -bottom-2 w-24 h-24 rotate-12 opacity-80 group-hover:scale-110 transition-transform">
+<img alt="Рок" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfCZ_qeh_zzFUTlcEalgKSuLHb04m1eHwQvpiW5-YQwMzyVAcQ0z8x4VcDwAclIFnUWgCd2AaBg6vF3dbhj3DPoJaCgoJ6g8L1GBJOt1Lqqj2LK3_IBqad2EEZbqcRQQsiLvTyCoZzDttx-k6HsqLK4bv4qMKYxzpzXxYuIMUjOnEfGTLpvPnDrdEytDJ9zv4fsk904UIwCIJB4dNb6MKVcq5piA7rO1Dpcz76jKhsBSTYK3YHIkQOc2CmxVpOfS5BtYInLENPIsFW"/>
+</div>
+</div>
+<!-- Hip-Hop -->
+<div class="relative overflow-hidden aspect-square rounded-xl bg-gradient-to-br from-[#11998e] to-[#38ef7d] p-md cursor-pointer group hover:scale-[1.02] transition-transform shadow-lg">
+<span class="font-headline-lg text-white font-bold relative z-10">Хіп-хоп</span>
+<div class="absolute -right-4 -bottom-2 w-24 h-24 rotate-12 opacity-80 group-hover:scale-110 transition-transform">
+<img alt="Хіп-хоп" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7yUhXfebezHh9Iwkv_0_vmrC6238bpUhVuXOwWwX9poe-qHX3dRZxkxdgZU1_erK1O9nzFrhOk7tfLtWjF7eI7nJNcyvb4kZHFnquT-cxVk17Pt_J9Eg4pBnuiXGHpcsjFPLYMSz4Z3Ib67Ati8pYc9UVC0N7diFuetZjKwK9762LvrzxDpsy3xsLcZKUQtQ5Uqw8rJdw1ldA49uBUUHD_m3pIU2OUoVxoUL0GHjA3XD8nxQSolCO-a5T86QjqRDacN5-ffELvRoA"/>
+</div>
+</div>
+<!-- Electronic -->
+<div class="relative overflow-hidden aspect-square rounded-xl bg-gradient-to-br from-[#6b21ff] to-[#4a00e0] p-md cursor-pointer group hover:scale-[1.02] transition-transform shadow-lg pulse-glow">
+<span class="font-headline-lg text-white font-bold relative z-10">Електроніка</span>
+<div class="absolute -right-4 -bottom-2 w-24 h-24 rotate-12 opacity-80 group-hover:scale-110 transition-transform">
+<img alt="Електроніка" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlWsV6slFJwa_-uWaKeGqq_V51cKorKkWd5LbymFyg7Tj-QcFyI74UeEJs4MsyWAOdfBpEy02H1nWXS1WPUwxAUZVgZJDqScd5MgYZk0VmAB51cgvnUswPWoYr_4Og7jySWoHvhRwqoyS38GpbRJMme-OzOfWEXIzjGMTjRINmjcwNNwO9LDTO8_ZXnj47sNdJswE77Tci_EhE4HjddgrK4EYSr-bROOreUQjsBl0yzsys4Fo0vBuyrYbmACaiXRcDhRefKm-9NqCP"/>
+</div>
+</div>
+<!-- Lo-Fi -->
+<div class="relative overflow-hidden aspect-square rounded-xl bg-gradient-to-br from-[#00c6ff] to-[#0072ff] p-md cursor-pointer group hover:scale-[1.02] transition-transform shadow-lg">
+<span class="font-headline-lg text-white font-bold relative z-10">Лоу-фай</span>
+<div class="absolute -right-4 -bottom-2 w-24 h-24 rotate-12 opacity-80 group-hover:scale-110 transition-transform">
+<img alt="Лоу-фай" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnmNNUA1itf_Rhrw9IFfyLdxtvM0zMqX5vz2biD_Z4zsKonCfXUdEia9wL1wb0wuJ5eaX-gmJZGClRP6pENQzRtFS9Nef1JDoQPEShekp6P6nQiq4Uys7YYEGrYHXWZ8JmYwY2TeHmlzjySxRM1G8VZV9w7L9ka71-9ECgPa4evWoKfy_uFvv7oPOMz8E6CNMYbU4mPwp6WuIlhWXQrEjAfpioZLRGHRqaA1rLoaawskZ5SyxIE51V7HqNjmlhzg9rKi75hoA5xxzk"/>
+</div>
+</div>
+<!-- Jazz -->
+<div class="relative overflow-hidden aspect-square rounded-xl bg-gradient-to-br from-[#f2994a] to-[#f2c94c] p-md cursor-pointer group hover:scale-[1.02] transition-transform shadow-lg">
+<span class="font-headline-lg text-white font-bold relative z-10">Джаз</span>
+<div class="absolute -right-4 -bottom-2 w-24 h-24 rotate-12 opacity-80 group-hover:scale-110 transition-transform">
+<img alt="Джаз" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjkvukswPkCf1jmIJLZNeKhWO8KKVz8lGU4AmMk-dRol0r1hmllPuGz-6lmTFNTJ4k722OGx8-V_NfBLl0vLY1jdQclnOx07zaoW1wWpu2O0VeJJZdor-GEi8SjQLTaxCJEflmRdim6pbkuBFAIiSFs3VX9uGiFnnOY72tq1xNJAe3Ln5kXL6soeDWx6jd0yu4dc4M55tIdLsjZoXozxDiPvu6hDF5sUUPm6W77oV_xOkLDqb8XJ06cJwwMGaBvv12dumu6MqzHLtn"/>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 md:hidden bg-surface-container/95 backdrop-blur-2xl border-t border-outline-variant/20 grid grid-cols-4 items-center h-16">
+<a class="flex flex-col items-center justify-center text-on-surface-variant" href="index.html">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="text-[10px] mt-1">Головна</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary-container" href="search.html">
+<span class="material-symbols-outlined" data-icon="search" style="font-variation-settings: 'FILL' 1;">search</span>
+<span class="text-[10px] mt-1 font-semibold">Пошук</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant" href="bibly.html">
+<span class="material-symbols-outlined" data-icon="library_music">library_music</span>
+<span class="text-[10px] mt-1">Бібліотека</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant" href="index.html">
+<span class="material-symbols-outlined" data-icon="play_circle">play_circle</span>
+<span class="text-[10px] mt-1">Плеєр</span>
+</a>
+</nav>
+<!-- Now Playing Bar (Persistent Footer) -->
+<footer class="fixed bottom-16 md:bottom-0 left-0 md:left-[280px] right-0 h-24 glass-panel border-t border-outline-variant/20 px-md py-sm flex items-center justify-between z-50">
+<!-- Current Song Info -->
+<div class="flex items-center gap-md w-1/3">
+<div class="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 shadow-lg">
+<img alt="Hyperion Dreams" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5gUou9sDBedpCKF-V8aC-NAB3E6CeOLUnftdhdv3pC0iGiaiaw_NQcRAKsvvTxfiwZIcov-OtYvvTTiVh7xDC4y_g8qUFQlF0UFTtELhFZjhe5UEgyvhTVx8nD8ttdvdNUd1i8ZQNmlUH4Fr_N0b46-YcFdcRdk7aliiy_AfrkvUfxP2I3OTY8hbHrpcZcGZv_fXUybZVYPtYOlrcu5bvQXPD4UK2dU3qoIBsY0MwFkvb3GGfgmMXn60VNJ7BB-ayNFeeFNElT7Bw"/>
+</div>
+<div class="hidden sm:block overflow-hidden">
+<h5 class="font-label-lg text-label-lg text-on-surface truncate">Hyperion Dreams</h5>
+<p class="font-body-sm text-label-md text-on-surface-variant truncate">Neon Pulse</p>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary-container transition-colors ml-2">favorite</button>
+</div>
+<!-- Player Controls -->
+<div class="flex flex-col items-center gap-xs w-1/3">
+<div class="flex items-center gap-md lg:gap-lg">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-on-surface text-xl">shuffle</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-on-surface text-xl">skip_previous</button>
+<button class="w-10 h-10 rounded-full bg-on-surface text-surface flex items-center justify-center hover:scale-105 transition-transform active:scale-95 shadow-md">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-on-surface text-xl">skip_next</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-on-surface text-xl">repeat</button>
+</div>
+<div class="w-full max-w-md flex items-center gap-sm">
+<span class="text-[10px] font-mono-md text-on-surface-variant w-8">2:14</span>
+<div class="flex-1 h-1 bg-surface-container-highest rounded-full relative group cursor-pointer">
+<div class="absolute left-0 top-0 bottom-0 bg-primary-container rounded-full w-[45%]">
+<div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 shadow-md"></div>
+</div>
+</div>
+<span class="text-[10px] font-mono-md text-on-surface-variant w-8">4:32</span>
+</div>
+</div>
+<!-- Volume & Actions -->
+<div class="flex items-center justify-end gap-md w-1/3">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-on-surface hidden lg:block">lyrics</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-on-surface hidden lg:block">queue_music</button>
+<div class="flex items-center gap-sm w-24 xl:w-32">
+<span class="material-symbols-outlined text-on-surface-variant text-lg">volume_up</span>
+<div class="flex-1 h-1 bg-surface-container-highest rounded-full">
+<div class="bg-primary-container h-full w-[70%] rounded-full"></div>
+</div>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-on-surface">fullscreen</button>
+</div>
+</footer>
+<script>
+    // Micro-interactions for buttons
+    document.querySelectorAll('a, button').forEach(el => {
+        el.addEventListener('mousedown', () => {
+            el.style.transform = 'scale(0.96)';
+        });
+        el.addEventListener('mouseup', () => {
+            el.style.transform = '';
+        });
+        el.addEventListener('mouseleave', () => {
+            el.style.transform = '';
+        });
+    });
+
+    // Active state for search input
+    const searchInput = document.querySelector('input[type="text"]');
+    if (searchInput) {
+        searchInput.addEventListener('focus', () => {
+            searchInput.parentElement.classList.add('ring-2', 'ring-primary-container/30');
+        });
+        searchInput.addEventListener('blur', () => {
+            searchInput.parentElement.classList.remove('ring-2', 'ring-primary-container/30');
+        });
+    }
+</script>
+</body></html>
+<script src="search.js"></script>
