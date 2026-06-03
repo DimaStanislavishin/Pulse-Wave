@@ -235,6 +235,9 @@ function switchLibraryTab(tabName, clickedBtn) {
   });
 }
 
+
+
+
 function toggleFavorite(event, button, songId) {
   event.stopPropagation();
 
