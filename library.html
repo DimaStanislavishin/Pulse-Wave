@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html class="dark" lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Бібліотека - Pulse Wave</title>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@300,0..1&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="libraryandsearch.js"></script>
+</head>
+
+<body>
+
+    <!-- ЛІВЕ МЕНЮ (Лише для ПК) -->
+    <aside>
+        <div class="brand">
+            <span class="material-symbols-outlined">waves</span>
+            Pulse Wave
+        </div>
+        <nav>
+            <button class="nav-btn" onclick="navigateTo('home')">
+                <span class="material-symbols-outlined">home</span>
+                Головна
+            </button>
+            <button class="nav-btn" onclick="navigateTo('search')">
+                <span class="material-symbols-outlined">search</span>
+                Пошук
+            </button>
+            <button class="nav-btn active" onclick="navigateTo('library')">
+                <span class="material-symbols-outlined">library_music</span>
+                Бібліотека
+            </button>
+        </nav>
+    </aside>
+
+    <!-- НИЖНЄ МЕНЮ (Лише для телефонів) -->
+    <div class="mobile-nav">
+        <button class="mobile-nav-btn" id="m-nav-home" onclick="navigateTo('home')">
+            <span class="material-symbols-outlined">home</span>
+            Головна
+        </button>
+        <button class="mobile-nav-btn" id="m-nav-search" onclick="navigateTo('search')">
+            <span class="material-symbols-outlined">search</span>
+            Пошук
+        </button>
+        <button class="mobile-nav-btn active" id="m-nav-library" onclick="navigateTo('library')">
+            <span class="material-symbols-outlined">library_music</span>
+            Бібліотека
+        </button>
+    </div>
+
+    <!-- ГОЛОВНИЙ ВМІСТ -->
+    <main>
+        <div class="view active" id="view-library">
+            <h2 class="section-title">Ваша медіатека</h2>
+
+            <!-- Вкладки керування бібліотекою -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchLibraryTab('all', this)">Всі треки</button>
+                <button class="tab-btn" onclick="switchLibraryTab('playlist', this)">Плейлисти</button>
+                <button class="tab-btn" onclick="switchLibraryTab('favorites', this)">Улюблені</button>
+            </div>
+
+            <!-- Плейлисти в бібліотеці -->
+            <div class="grid-layout" id="library-playlists">
+                <div class="card" onclick="switchLibraryTab('favorites')">
+                    <div class="card-img-wrapper" style="background: linear-gradient(135deg, var(--primary-color), #201f20); display:flex; align-items:center; justify-content:center;">
+                        <span class="material-symbols-outlined" style="font-size: 64px; color: #fff; font-variation-settings: 'FILL' 1;">favorite</span>
+                    </div>
+                    <div class="card-title">Улюблені пісні</div>
+                    <div class="card-subtitle">Ваш персональний список</div>
+                </div>
+                <div class="card" onclick="switchLibraryTab('playlist', this)">
+                    <div class="card-img-wrapper" style="background: linear-gradient(135deg, #ff6b6b, #ff8c42); display:flex; align-items:center; justify-content:center;">
+                        <span class="material-symbols-outlined" style="font-size: 64px; color: #fff; font-variation-settings: 'FILL' 1;">queue_music</span>
+                    </div>
+                    <div class="card-title">Мої плейлисти</div>
+                    <div class="card-subtitle">5 плейлистів</div>
+                </div>
+                <div class="card" onclick="switchLibraryTab('all', this)">
+                    <div class="card-img-wrapper" style="background: linear-gradient(135deg, #4ecdc4, #44a08d); display:flex; align-items:center; justify-content:center;">
+                        <span class="material-symbols-outlined" style="font-size: 64px; color: #fff; font-variation-settings: 'FILL' 1;">music_note</span>
+                    </div>
+                    <div class="card-title">Всі завантажені</div>
+                    <div class="card-subtitle">42 пісні</div>
+                </div>
+            </div>
+
+            <!-- Список пісень -->
+            <h3 style="margin-top: 32px; margin-bottom: 16px; font-size: 18px; font-weight: 600;">Недавно додані</h3>
+            <div class="song-list" id="library-songs-list">
+                <!-- Пісня 1 -->
+                <div class="song-row" onclick="playSong('Electric Moonlight', 'Neon Horizon', 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&q=80')">
+                    <div class="song-num">1</div>
+                    <img class="song-cover" src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&q=80" alt="cover"/>
+                    <div class="song-info">
+                        <div class="song-title">Electric Moonlight</div>
+                        <div class="song-artist">Neon Horizon</div>
+                    </div>
+                    <div class="song-album">After Dark</div>
+                    <div class="song-duration">3:45</div>
+                    <button class="song-action-btn" onclick="toggleFavorite(event, this)">
+                        <span class="material-symbols-outlined">favorite</span>
+                    </button>
+                </div>
+
+                <!-- Пісня 2 -->
+                <div class="song-row" onclick="playSong('Digital Soul', 'Chrome Static', 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=300&q=80')">
+                    <div class="song-num">2</div>
+                    <img class="song-cover" src="https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=300&q=80" alt="cover"/>
+                    <div class="song-info">
+                        <div class="song-title">Digital Soul</div>
+                        <div class="song-artist">Chrome Static</div>
+                    </div>
+                    <div class="song-album">The Grid</div>
+                    <div class="song-duration">4:12</div>
+                    <button class="song-action-btn" onclick="toggleFavorite(event, this)">
+                        <span class="material-symbols-outlined">favorite</span>
+                    </button>
+                </div>
+
+                <!-- Пісня 3 -->
+                <div class="song-row" onclick="playSong('Rainy Rooftops', 'Lo-fi Echo', 'https://images.unsplash.com/photo-1515462277126-270d878326e5?w=300&q=80')">
+                    <div class="song-num">3</div>
+                    <img class="song-cover" src="https://images.unsplash.com/photo-1515462277126-270d878326e5?w=300&q=80" alt="cover"/>
+                    <div class="song-info">
+                        <div class="song-title">Rainy Rooftops</div>
+                        <div class="song-artist">Lo-fi Echo</div>
+                    </div>
+                    <div class="song-album">Cozy Vibes</div>
+                    <div class="song-duration">2:58</div>
+                    <button class="song-action-btn" onclick="toggleFavorite(event, this)">
+                        <span class="material-symbols-outlined">favorite</span>
+                    </button>
+                </div>
+
+                <!-- Пісня 4 -->
+                <div class="song-row" onclick="playSong('Midnight Lofi', 'Chill Beats', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&q=80')">
+                    <div class="song-num">4</div>
+                    <img class="song-cover" src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&q=80" alt="cover"/>
+                    <div class="song-info">
+                        <div class="song-title">Midnight Lofi</div>
+                        <div class="song-artist">Chill Beats</div>
+                    </div>
+                    <div class="song-album">Night Sessions</div>
+                    <div class="song-duration">3:22</div>
+                    <button class="song-action-btn" onclick="toggleFavorite(event, this)">
+                        <span class="material-symbols-outlined">favorite</span>
+                    </button>
+                </div>
+
+                <!-- Пісня 5 -->
+                <div class="song-row" onclick="playSong('Starlight Orbit', 'Cosmic Voyager', 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&q=80')">
+                    <div class="song-num">5</div>
+                    <img class="song-cover" src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&q=80" alt="cover"/>
+                    <div class="song-info">
+                        <div class="song-title">Starlight Orbit</div>
+                        <div class="song-artist">Cosmic Voyager</div>
+                    </div>
+                    <div class="song-album">Deep Space</div>
+                    <div class="song-duration">4:05</div>
+                    <button class="song-action-btn" onclick="toggleFavorite(event, this)">
+                        <span class="material-symbols-outlined">favorite</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ПЛЕЄР -->
+    <footer class="player-bar">
+        <div class="player-song-info">
+            <img class="player-cover" id="current-cover" src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&q=80" alt="[Зараз грає]"/>
+            <div class="player-text">
+                <div class="player-title" id="current-title">Neon Pulse</div>
+                <div class="player-artist" id="current-artist">Hyperion Dreams</div>
+            </div>
+        </div>
+
+        <div class="player-controls">
+            <div class="control-buttons">
+                <button class="control-btn"><span class="material-symbols-outlined">shuffle</span></button>
+                <button class="control-btn" onclick="playPrevious()"><span class="material-symbols-outlined">skip_previous</span></button>
+                <button class="control-btn btn-play" id="play-btn" onclick="togglePlay()">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+                </button>
+                <button class="control-btn" onclick="playNext()"><span class="material-symbols-outlined">skip_next</span></button>
+                <button class="control-btn"><span class="material-symbols-outlined">repeat</span></button>
+            </div>
+            
+            <div class="progress-container">
+                <span class="time-label" id="current-time">0:00</span>
+                <input class="slider" id="progress-bar" type="range" min="0" max="100" value="0" oninput="seekTrack(this.value)"/>
+                <span class="time-label" id="total-time">3:12</span>
+            </div>
+        </div>
+
+        <div class="player-actions">
+            <button class="control-btn"><span class="material-symbols-outlined">lyrics</span></button>
+            <button class="control-btn"><span class="material-symbols-outlined">queue_music</span></button>
+            <div class="volume-controls">
+                <span class="material-symbols-outlined" style="font-size: 20px;">volume_up</span>
+                <input class="slider" type="range" min="0" max="100" value="75" oninput="changeVolume(this.value)"/>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>
