@@ -2,6 +2,12 @@
          * 3. Сторінка Пошуку
          * Дозволяє шукай треки за введеними символами в реальному часі.
          */
+
+const appName = "Maloney";
+let apiHost = "https://discoveryprovider.audius.co"; // Початковий хост
+let activeTracksList = []; // Свіжий список треків
+let currentTrackIndex = -1; // Індекс поточної пісні
+
 function performSearch() {
   const query = document.getElementById('search-input').value.toLowerCase();
   const resultsContainer = document.getElementById('search-results-container');
