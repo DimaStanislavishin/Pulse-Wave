@@ -11,6 +11,7 @@
         rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
     <script src="libraryandsearch.js"></script>
+    <script src="search.js"></script>
 </head>
 
 <body>
@@ -22,18 +23,18 @@
             Pulse Wave
         </div>
         <nav>
-            <button class="nav-btn" onclick="navigateTo('home')">
+            <a href="index.html" class="nav-btn">
                 <span class="material-symbols-outlined">home</span>
                 Головна
-            </button>
-            <button class="nav-btn active" onclick="navigateTo('search')">
+            </a>
+            <a href="search.html" class="nav-btn active">
                 <span class="material-symbols-outlined">search</span>
                 Пошук
-            </button>
-            <button class="nav-btn" onclick="navigateTo('library')">
+            </a>
+            <a href="library.html" class="nav-btn">
                 <span class="material-symbols-outlined">library_music</span>
                 Бібліотека
-            </button>
+            </a>
         </nav>
     </aside>
 
@@ -61,53 +62,53 @@
             <!-- Пошуковий інпут -->
             <div class="search-container">
                 <span class="material-symbols-outlined">search</span>
-                <input type="text" id="search-input" placeholder="Пісні, виконавці чи жанри..." oninput="performSearch()"/>
+                <input type="text" id="search-input" placeholder="Пісні, виконавці чи жанри..." />
             </div>
 
-            <!-- Результати пошуку пісень -->
-            <div id="search-results-container" style="display: none; margin-top: 32px;">
-                <h3 style="margin-bottom: 16px; font-size: 18px; font-weight: 600;">Знайдені пісні</h3>
+            <!-- Результати пошуку (ВИДНО ОДРАЗУ) -->
+            <div id="search-results-container">
+                <h3 id="search-results-title" style="margin-bottom: 16px; font-size: 18px; font-weight: 600; display: none;">Знайдені пісні</h3>
                 <div class="song-list" id="search-songs-list">
                     <!-- Заповнюється через JS -->
                 </div>
             </div>
 
-            <!-- Жанри для фільтрації -->
-            <div id="search-genres-section">
+            <!-- Жанри для фільтрації (СХОВУЄТЬСЯ ПРИ ПОШУКУ) -->
+            <div id="genres-section">
                 <h3 style="margin-bottom: 16px; font-size: 18px; font-weight: 600;">Популярні жанри</h3>
                 <div class="grid-layout" id="search-grid">
-                    <div class="card genre-card" style="background: linear-gradient(135deg, #e02c5c, #f77737);" onclick="filterSearchGenre('Поп')">
+                    <div class="card genre-card" style="background: linear-gradient(135deg, #e02c5c, #f77737);" onclick="quickSearch('Поп')">
                         <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 30px;">🎤 Поп</h3>
                         <p style="font-size: 12px; opacity: 0.8;">Найпопулярніші хіти</p>
                     </div>
-                    <div class="card genre-card" style="background: linear-gradient(135deg, #1b8a5a, #0bb8cf);" onclick="filterSearchGenre('Рок')">
+                    <div class="card genre-card" style="background: linear-gradient(135deg, #1b8a5a, #0bb8cf);" onclick="quickSearch('Рок')">
                         <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 30px;">🎸 Рок</h3>
                         <p style="font-size: 12px; opacity: 0.8;">Класичні рок-хіти</p>
                     </div>
-                    <div class="card genre-card" style="background: linear-gradient(135deg, #8c2cf5, #ff2a85);" onclick="filterSearchGenre('Електроніка')">
+                    <div class="card genre-card" style="background: linear-gradient(135deg, #8c2cf5, #ff2a85);" onclick="quickSearch('Електроніка')">
                         <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 30px;">⚡ Електроніка</h3>
                         <p style="font-size: 12px; opacity: 0.8;">Новітня електронна музика</p>
                     </div>
-                    <div class="card genre-card" style="background: linear-gradient(135deg, #1f45fc, #00ced1);" onclick="filterSearchGenre('Лоу-фай')">
+                    <div class="card genre-card" style="background: linear-gradient(135deg, #1f45fc, #00ced1);" onclick="quickSearch('Лоу-фай')">
                         <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 30px;">🎧 Лоу-фай</h3>
                         <p style="font-size: 12px; opacity: 0.8;">Релаксуюча атмосфера</p>
                     </div>
-                    <div class="card genre-card" style="background: linear-gradient(135deg, #f12711, #f5af19);" onclick="filterSearchGenre('Джаз')">
+                    <div class="card genre-card" style="background: linear-gradient(135deg, #f12711, #f5af19);" onclick="quickSearch('Джаз')">
                         <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 30px;">🎺 Джаз</h3>
                         <p style="font-size: 12px; opacity: 0.8;">Класичний джаз</p>
                     </div>
-                    <div class="card genre-card" style="background: linear-gradient(135deg, #2a2a72, #009ffd);" onclick="filterSearchGenre('Класика')">
+                    <div class="card genre-card" style="background: linear-gradient(135deg, #2a2a72, #009ffd);" onclick="quickSearch('Класика')">
                         <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 30px;">🎻 Класика</h3>
                         <p style="font-size: 12px; opacity: 0.8;">Класична музика</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Найпопулярніші пісні -->
-            <div style="margin-top: 48px;">
+            <!-- Тренди (СХОВУЄТЬСЯ ПРИ ПОШУКУ) -->
+            <div id="trends-section" style="margin-top: 48px;">
                 <h3 style="margin-bottom: 16px; font-size: 18px; font-weight: 600;">Тренди зараз</h3>
                 <div class="song-list">
-                    <div class="song-row" onclick="playSong('Electric Moonlight', 'Neon Horizon', 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&q=80')">
+                    <div class="song-row" onclick="playSong({title: 'Electric Moonlight', user: {name: 'Neon Horizon'}, artwork: {'150x150': 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&q=80'}, duration: 225000, id: 'trend1'})">
                         <div class="song-num" style="color: var(--primary-color); font-weight: 700;">1</div>
                         <img class="song-cover" src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&q=80" alt="cover"/>
                         <div class="song-info">
@@ -121,7 +122,7 @@
                         </button>
                     </div>
 
-                    <div class="song-row" onclick="playSong('Digital Soul', 'Chrome Static', 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=300&q=80')">
+                    <div class="song-row" onclick="playSong({title: 'Digital Soul', user: {name: 'Chrome Static'}, artwork: {'150x150': 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=300&q=80'}, duration: 252000, id: 'trend2'})">
                         <div class="song-num" style="color: var(--primary-color); font-weight: 700;">2</div>
                         <img class="song-cover" src="https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=300&q=80" alt="cover"/>
                         <div class="song-info">
@@ -135,7 +136,7 @@
                         </button>
                     </div>
 
-                    <div class="song-row" onclick="playSong('Rainy Rooftops', 'Lo-fi Echo', 'https://images.unsplash.com/photo-1515462277126-270d878326e5?w=300&q=80')">
+                    <div class="song-row" onclick="playSong({title: 'Rainy Rooftops', user: {name: 'Lo-fi Echo'}, artwork: {'150x150': 'https://images.unsplash.com/photo-1515462277126-270d878326e5?w=300&q=80'}, duration: 178000, id: 'trend3'})">
                         <div class="song-num" style="color: var(--primary-color); font-weight: 700;">3</div>
                         <img class="song-cover" src="https://images.unsplash.com/photo-1515462277126-270d878326e5?w=300&q=80" alt="cover"/>
                         <div class="song-info">
@@ -144,34 +145,6 @@
                         </div>
                         <div class="song-album">Cozy Vibes</div>
                         <div class="song-duration">2:58</div>
-                        <button class="song-action-btn" onclick="toggleFavorite(event, this)">
-                            <span class="material-symbols-outlined">favorite</span>
-                        </button>
-                    </div>
-
-                    <div class="song-row" onclick="playSong('Midnight Lofi', 'Chill Beats', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&q=80')">
-                        <div class="song-num" style="color: var(--primary-color); font-weight: 700;">4</div>
-                        <img class="song-cover" src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&q=80" alt="cover"/>
-                        <div class="song-info">
-                            <div class="song-title">Midnight Lofi</div>
-                            <div class="song-artist">Chill Beats</div>
-                        </div>
-                        <div class="song-album">Night Sessions</div>
-                        <div class="song-duration">3:22</div>
-                        <button class="song-action-btn" onclick="toggleFavorite(event, this)">
-                            <span class="material-symbols-outlined">favorite</span>
-                        </button>
-                    </div>
-
-                    <div class="song-row" onclick="playSong('Starlight Orbit', 'Cosmic Voyager', 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&q=80')">
-                        <div class="song-num" style="color: var(--primary-color); font-weight: 700;">5</div>
-                        <img class="song-cover" src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&q=80" alt="cover"/>
-                        <div class="song-info">
-                            <div class="song-title">Starlight Orbit</div>
-                            <div class="song-artist">Cosmic Voyager</div>
-                        </div>
-                        <div class="song-album">Deep Space</div>
-                        <div class="song-duration">4:05</div>
                         <button class="song-action-btn" onclick="toggleFavorite(event, this)">
                             <span class="material-symbols-outlined">favorite</span>
                         </button>

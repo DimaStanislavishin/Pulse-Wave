@@ -19,6 +19,8 @@
   /* Висота плеєра */
 }
 
+
+
 /* Загальні налаштування сторінки */
 * {
   box-sizing: border-box;
@@ -107,6 +109,7 @@ nav {
   width: 100%;
   text-align: left;
   transition: all 0.2s ease;
+  text-decoration: none;
 }
 
 .nav-btn:hover {

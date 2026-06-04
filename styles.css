@@ -90,6 +90,7 @@ nav {
   width: 100%;
   text-align: left;
   transition: all 0.2s ease;
+  text-decoration: none;
 }
 
 .nav-btn:hover {
@@ -509,6 +510,7 @@ footer.player-bar {
   outline: none;
   cursor: pointer;
 }
+
 
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
