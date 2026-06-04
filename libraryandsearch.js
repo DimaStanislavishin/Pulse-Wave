@@ -63,71 +63,9 @@ let isPlaying = false;
  * 1. Навігація по сторінках
  * Переключення між головною, пошуком та бібліотекою
  */
-function navigateTo(page) {
-  const views = document.querySelectorAll('.view');
-  views.forEach(view => view.classList.remove('active'));
-
-  const targetView = document.getElementById(`view-${page}`);
-  if (targetView) {
-    targetView.classList.add('active');
-  }
-
-  // Оновлюємо активну кнопку в навігації (десктоп)
-  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-  event.target.closest('.nav-btn')?.classList.add('active');
-
-  // Оновлюємо активну кнопку в мобільної навігації
-  document.querySelectorAll('.mobile-nav-btn').forEach(btn => btn.classList.remove('active'));
-  const mobileBtn = document.getElementById(`m-nav-${page}`);
-  if (mobileBtn) {
-    mobileBtn.classList.add('active');
-  }
-}
-
 /**
  * 2. Плеєр: Управління музикою
  */
-function playSong(title, artist, cover) {
-  document.getElementById('current-title').textContent = title;
-  document.getElementById('current-artist').textContent = artist;
-  document.getElementById('current-cover').src = cover;
-  isPlaying = true;
-  updatePlayButton();
-}
-
-function togglePlay() {
-  isPlaying = !isPlaying;
-  updatePlayButton();
-}
-
-function updatePlayButton() {
-  const playBtn = document.getElementById('play-btn');
-  if (playBtn) {
-    const icon = playBtn.querySelector('span');
-    if (isPlaying) {
-      icon.textContent = 'pause';
-    } else {
-      icon.textContent = 'play_arrow';
-    }
-  }
-}
-
-function playPrevious() {
-  console.log('Попередня пісня');
-}
-
-function playNext() {
-  console.log('Наступна пісня');
-}
-
-function seekTrack(value) {
-  console.log('Перемотка до:', value);
-}
-
-function changeVolume(value) {
-  console.log('Гучність:', value);
-}
-
 /**
  * 3. Сторінка Пошуку
  * Дозволяє шукати треки за введеними символами в реальному часі
@@ -137,7 +75,7 @@ function performSearch() {
   const resultsContainer = document.getElementById('search-results-container');
   const songsList = document.getElementById('search-songs-list');
   const categoriesGrid = document.getElementById('search-grid');
-  const genresSection = document.getElementById('search-genres-section');
+  const genresSection = document.getElementById('genres-section');
 
   if (query.trim() === '') {
     // Якщо поле пошуку порожнє, показуємо жанри та ховаємо список результатів

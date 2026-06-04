@@ -1,244 +1,215 @@
-const appName = "Pulse Wave";
-let apiHost = "https://discoveryprovider.audius.co"; // Початковий хост
-let activeTracksList = []; // Свіжий список треків
-let currentTrackIndex = -1; // Індекс поточної пісні
+// Pulse Wave — main script (refactored)
+const appName = 'Pulse Wave';
+let apiHost = 'https://discoveryprovider.audius.co'; // fallback host
+let activeTracksList = [];
+let currentTrackIndex = -1;
 
-// КРОК 1: Автоматичний пошук робочого API сервера
-function initAudius() {
-    fetch("https://api.audius.co")
-        .then(response => response.json())
-        .then(result => {
-            if (result.data && result.data.length > 0) {
-                apiHost = result.data[0];
-            }
-            document.getElementById("host-name").innerText = apiHost.replace("https://", "");
+// minimal local DB for UI fallback
+const songDatabase = [
+    { id: 1, title: 'Electric Moonlight', artist: 'Neon Horizon', album: 'After Dark', duration: '3:45', cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&q=80', genre: 'Електроніка' },
+    { id: 2, title: 'Digital Soul', artist: 'Chrome Static', album: 'The Grid', duration: '4:12', cover: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=300&q=80', genre: 'Електроніка' },
+    { id: 3, title: 'Rainy Rooftops', artist: 'Lo-fi Echo', album: 'Cozy Vibes', duration: '2:58', cover: 'https://images.unsplash.com/photo-1515462277126-270d878326e5?w=300&q=80', genre: 'Лоу-фай' }
+];
 
-            // Завантажуємо тренди відразу після підключення до сервера
-            loadTopTracks();
-        });
+let favoriteTracks = [];
+
+// DOM refs
+let tracksListContainer = null;
+let heroBanner = null;
+let heroTitle = null;
+let heroDesc = null;
+let audioEl = null;
+
+function formatTime(sec) {
+    if (!isFinite(sec)) return '0:00';
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    tracksListContainer = document.getElementById('tracks-list') || document.getElementById('library-songs-list');
+    heroBanner = document.querySelector('.hero-banner');
+    heroTitle = document.querySelector('.hero-title');
+    heroDesc = document.querySelector('.hero-desc');
+    audioEl = document.getElementById('audio');
 
+    if (audioEl) {
+        audioEl.addEventListener('timeupdate', () => {
+            const progress = document.getElementById('progress-bar');
+            const currentTime = document.getElementById('current-time');
+            const totalTime = document.getElementById('total-time');
+            if (progress && audioEl.duration) progress.value = (audioEl.currentTime / audioEl.duration) * 100;
+            if (currentTime) currentTime.innerText = formatTime(audioEl.currentTime);
+            if (totalTime && audioEl.duration) totalTime.innerText = formatTime(audioEl.duration);
+        });
+        audioEl.addEventListener('ended', playNext);
+    }
 
+    renderRecommendedCards();
+    initAudius();
+});
 
-// КРОК 2: Завантаження ТОП треків з API
-function loadTopTracks() {
-    listTitle.innerText = "Популярне зараз 📈";
-    let url = apiHost + "/v1/tracks/trending?app_name=" + appName;
-
-    fetch(url)
-        .then(response => response.json())
+function initAudius() {
+    fetch('https://api.audius.co')
+        .then(r => r.json())
         .then(result => {
-            activeTracksList = result.data;
-            displayTracks(result.data);
+            if (result && result.length) apiHost = result[0];
+        })
+        .catch(() => console.warn('Audius host detection failed — using fallback'))
+        .finally(() => loadTopTracks());
+}
 
-            // ОНОВЛЕННЯ БАНЕРА ДАНІМИ З ТОП-1 ТРЕКУ НА ПЛАТФОРМІ!
-            updateHeroBanner(result.data);
+function loadTopTracks() {
+    const url = `${apiHost}/v1/tracks/trending?app_name=${encodeURIComponent(appName)}`;
+    fetch(url)
+        .then(r => r.json())
+        .then(result => {
+            if (result && result.data && result.data.length) {
+                activeTracksList = result.data;
+                displayTracks(result.data);
+                updateHeroBanner(result.data);
+            } else {
+                // fallback to local
+                activeTracksList = songDatabase.map(s => ({ id: s.id, title: s.title, user: { name: s.artist }, artwork: { '150x150': s.cover }, cover: s.cover }));
+                displayTracks(activeTracksList);
+                updateHeroBanner(activeTracksList);
+            }
+        })
+        .catch(() => {
+            activeTracksList = songDatabase.map(s => ({ id: s.id, title: s.title, user: { name: s.artist }, artwork: { '150x150': s.cover }, cover: s.cover }));
+            displayTracks(activeTracksList);
+            updateHeroBanner(activeTracksList);
         });
 }
 
 function updateHeroBanner(tracks) {
-    if (tracks && tracks.length > 0) {
-        // Беремо найперший (найпопулярніший трек №1 у світі прямо зараз)
-        let topTrack = tracks[0];
-        let coverUrl = topTrack.artwork ? topTrack.artwork['480x480'] || topTrack.artwork['150x150'] : '';
-
-        // Оновлюємо заголовок та опис банера на реальні дані
-        heroTitle.innerHTML = topTrack.title;
-        heroDesc.innerText = "Найактуальніший хіт на платформі сьогодні від автора " + topTrack.user.name + ". Занурюйтесь у справжнє живе звучання!";
-
-        // Оновлюємо фон банера на реальну обкладинку треку
-        if (coverUrl) {
-            heroBanner.style.backgroundImage = "linear-gradient(rgba(27, 12, 43, 0.6), rgba(27, 12, 43, 0.95)), url('" + coverUrl + "')";
-        }
-    }
+    if (!tracks || !tracks.length) return;
+    const top = tracks[0];
+    const cover = top.artwork ? (top.artwork['480x480'] || top.artwork['150x150']) : (top.cover || '');
+    const artist = top.user ? top.user.name : (top.artist || '');
+    if (heroTitle) heroTitle.innerText = top.title || heroTitle.innerText;
+    if (heroDesc) heroDesc.innerText = `Найактуальніший хіт від ${artist}`;
+    if (heroBanner && cover) heroBanner.style.backgroundImage = `linear-gradient(rgba(27,12,43,0.6), rgba(27,12,43,0.95)), url('${cover}')`;
 }
 
-// КРОК 4: Пошук музики за текстом
-function searchMusic() {
-    let query = searchInput.value.trim();
-    if (query === "") return;
-
-    listTitle.innerText = "Результати пошуку для: " + query;
-    let url = apiHost + "/v1/tracks/search?query=" + encodeURIComponent(query) + "&app_name=" + appName;
-
-    fetch(url)
-        .then(response => response.json())
-        .then(result => {
-            activeTracksList = result.data;
-            displayTracks(result.data);
-        });
-}
-
-// Швидкий пошук з плиток меню
-function quickPlayKeyword(keyword) {
-    searchInput.value = keyword;
-    searchMusic();
-}
-
-// КРОК 5: Виведення списку треків у HTML-код сторінки
 function displayTracks(tracks) {
-    tracksListContainer.innerHTML = ""; // очищаємо попередній список
+    const container = document.getElementById('tracks-list') || document.getElementById('search-songs-list') || tracksListContainer;
+    if (!container) return;
+    container.innerHTML = '';
+    if (!tracks || !tracks.length) {
+        container.innerHTML = "<li style='padding:20px;text-align:center;color:#dcbfc7;'>Нічого не знайдено 😢</li>";
+        return;
+    }
+    tracks.forEach((track, i) => {
+        const cover = track.artwork ? track.artwork['150x150'] : (track.cover || '');
+        const artist = track.user ? track.user.name : (track.artist || '');
+        const li = document.createElement('li');
+        li.className = 'song-row';
+        li.innerHTML = `
+            <div class="song-num">${i+1}</div>
+            <img class="song-cover" src="${cover}" alt="cover" />
+            <div class="song-info"><div class="song-title">${track.title}</div><div class="song-artist">${artist}</div></div>
+            <div class="song-album"></div>
+            <div class="song-duration"></div>
+            <button class="song-action-btn"><span class="material-symbols-outlined">play_arrow</span></button>
+        `;
+        li.addEventListener('click', () => { currentTrackIndex = i; playSong(track); });
+        container.appendChild(li);
+    });
+}
 
-    if (tracks.length === 0) {
-        tracksListContainer.innerHTML = "<li style='padding: 20px; text-align: center; color: #dcbfc7;'>Нічого не знайдено 😢</li>";
+function playSong(a, b, c) {
+    // object form
+    if (a && typeof a === 'object') {
+        const track = a;
+        const streamUrl = track.id && !track.cover ? `${apiHost}/v1/tracks/${track.id}/stream?app_name=${encodeURIComponent(appName)}` : (track.stream || track.cover || '');
+        const cover = track.artwork ? track.artwork['150x150'] : (track.cover || '');
+        const title = track.title || '';
+        const artist = track.user ? track.user.name : (track.artist || '');
+        const titleEl = document.getElementById('current-title');
+        const artistEl = document.getElementById('current-artist');
+        const coverEl = document.getElementById('current-cover');
+        if (titleEl) titleEl.innerText = title;
+        if (artistEl) artistEl.innerText = artist;
+        if (coverEl && cover) coverEl.src = cover;
+        if (audioEl && streamUrl) { audioEl.src = streamUrl; audioEl.play().catch(()=>{}); }
         return;
     }
 
-    for (let i = 0; i < tracks.length; i++) {
-        let track = tracks[i];
-        let coverUrl = track.artwork ? track.artwork['150x150'] : '';
-
-        let li = document.createElement("li");
-        li.className = "track-item";
-
-        li.innerHTML = `
-                    <div class="track-details">
-                        <div class="track-pic">
-                            ${coverUrl ? `<img src="${coverUrl}">` : `<span class="material-symbols-outlined" style="font-size: 18px; color: #dcbfc7;">music_note</span>`}
-                        </div>
-                        <div class="track-meta">
-                            <div class="track-title">${track.title}</div>
-                            <div class="track-artist">${track.user.name}</div>
-                        </div>
-                    </div>
-                    <span class="material-symbols-outlined" style="font-size: 20px; color: #ffb0cb;">play_circle</span>
-                `;
-
-        li.onclick = function () {
-            currentTrackIndex = i;
-            playSong(track);
-        };
-
-        tracksListContainer.appendChild(li);
-    }
+    // string form: title, artist, cover
+    const title = a || '';
+    const artist = b || '';
+    const cover = c || '';
+    const titleEl = document.getElementById('current-title');
+    const artistEl = document.getElementById('current-artist');
+    const coverEl = document.getElementById('current-cover');
+    if (titleEl) titleEl.innerText = title;
+    if (artistEl) artistEl.innerText = artist;
+    if (coverEl && cover) coverEl.src = cover;
+    if (audioEl && (cover.endsWith('.mp3') || cover.endsWith('.wav') || cover.includes('audio') || cover.includes('.mp3'))) { audioEl.src = cover; audioEl.play().catch(()=>{}); }
 }
 
-// КРОК 6: Запуск відтворення обраного треку
-function playSong(track) {
-    let streamUrl = apiHost + "/v1/tracks/" + track.id + "/stream?app_name=" + appName;
-    let coverUrl = track.artwork ? track.artwork['150x150'] : '';
-
-    // Оновлюємо нижній бар програвача
-    document.getElementById("player-title").innerText = track.title;
-    document.getElementById("player-artist").innerText = track.user.name;
-
-    let coverImg = document.getElementById("player-cover");
-    let coverPlaceholder = document.getElementById("player-placeholder-art");
-
-    if (coverUrl) {
-        coverImg.src = coverUrl;
-        coverImg.style.display = "block";
-        coverPlaceholder.style.display = "none";
-    } else {
-        coverImg.style.display = "none";
-        coverPlaceholder.style.display = "flex";
-    }
-
-    // Запускаємо відтворення в audio
-    audio.src = streamUrl;
-    audio.play();
-
-    document.getElementById("play-icon").innerText = "pause";
+function togglePlay() {
+    if (!audioEl) return;
+    if (audioEl.paused) audioEl.play().catch(()=>{});
+    else audioEl.pause();
 }
 
-// Кнопка на банері "Слухати зараз" (тепер грає саме той трек, що відображений на банері!)
-function playFeaturedSong() {
-    if (activeTracksList.length > 0) {
-        currentTrackIndex = 0;
-        playSong(activeTracksList[0]);
-    }
+function playNext() {
+    if (!activeTracksList || !activeTracksList.length) return;
+    currentTrackIndex = (currentTrackIndex + 1) % activeTracksList.length;
+    playSong(activeTracksList[currentTrackIndex]);
 }
 
+function playPrevious() {
+    if (!activeTracksList || !activeTracksList.length) return;
+    currentTrackIndex = (currentTrackIndex - 1 + activeTracksList.length) % activeTracksList.length;
+    playSong(activeTracksList[currentTrackIndex]);
+}
 
+function seekTrack(value) {
+    if (!audioEl || !audioEl.duration) return;
+    const pct = Number(value);
+    if (isNaN(pct)) return;
+    audioEl.currentTime = audioEl.duration * (pct / 100);
+}
 
-
-
-
-
-
-
-/**
-         * 3. Сторінка Пошуку
-         * Дозволяє шукай треки за введеними символами в реальному часі.
-         */
+function changeVolume(v) { if (!audioEl) return; audioEl.volume = Math.max(0, Math.min(1, Number(v) / 100)); }
 
 function performSearch() {
-    const query = document.getElementById('search-input').value.toLowerCase();
+    const q = (document.getElementById('search-input')?.value || '').toLowerCase();
     const resultsContainer = document.getElementById('search-results-container');
     const songsList = document.getElementById('search-songs-list');
     const categoriesGrid = document.getElementById('search-grid');
-
-    if (query.trim() === '') {
-        // Якщо поле пошуку порожнє, показуємо жанри та ховаємо список результатів
-        resultsContainer.style.display = 'none';
-        categoriesGrid.style.display = 'grid';
-        return;
-    }
-
-    // Фільтруємо базу даних пісень
-    const filteredSongs = songDatabase.filter(song =>
-        song.title.toLowerCase().includes(query) ||
-        song.artist.toLowerCase().includes(query) ||
-        song.genre.toLowerCase().includes(query)
-    );
-
-    // Очищуємо та наповнюємо список результатів
+    if (!songsList || !resultsContainer || !categoriesGrid) return;
+    if (!q.trim()) { resultsContainer.style.display = 'none'; categoriesGrid.style.display = 'grid'; return; }
+    const filtered = songDatabase.filter(s => s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q) || s.genre.toLowerCase().includes(q));
     songsList.innerHTML = '';
-    if (filteredSongs.length > 0) {
-        filteredSongs.forEach((song, index) => {
-            songsList.innerHTML += `
-                        <div class="song-row" onclick="playSong('${song.title}', '${song.artist}', '${song.cover}')">
-                            <div class="song-num">${index + 1}</div>
-                            <img class="song-cover" src="${song.cover}" alt="cover"/>
-                            <div class="song-info">
-                                <div class="song-title">${song.title}</div>
-                                <div class="song-artist">${song.artist}</div>
-                            </div>
-                            <div class="song-album">${song.album}</div>
-                            <div class="song-duration">${song.duration}</div>
-                            <button class="song-action-btn" onclick="toggleFavorite(event, this)">
-                                <span class="material-symbols-outlined">favorite</span>
-                            </button>
-                        </div>
-                    `;
-        });
-    } else {
-        songsList.innerHTML = '<p style="color: var(--text-muted); padding: 16px;">Нічого не знайдено за вашим запитом.</p>';
-    }
-
-    // Показуємо результати та приховуємо базову сітку категорій
-    resultsContainer.style.display = 'block';
-    categoriesGrid.style.display = 'none';
+    if (filtered.length) filtered.forEach((song, idx) => {
+        const div = document.createElement('div'); div.className = 'song-row';
+        div.innerHTML = `<div class="song-num">${idx+1}</div><img class="song-cover" src="${song.cover}"/><div class="song-info"><div class="song-title">${song.title}</div><div class="song-artist">${song.artist}</div></div><div class="song-album">${song.album}</div><div class="song-duration">${song.duration}</div><button class="song-action-btn"><span class="material-symbols-outlined">favorite</span></button>`;
+        div.addEventListener('click', () => playSong(song)); songsList.appendChild(div);
+    });
+    if (!filtered.length) songsList.innerHTML = '<p style="color:var(--text-muted);padding:16px;">Нічого не знайдено за вашим запитом.</p>';
+    resultsContainer.style.display = 'block'; categoriesGrid.style.display = 'none';
 }
 
-// Швидкий клік по жанру заповнює пошук
-function filterSearchGenre(genreName) {
-    document.getElementById('search-input').value = genreName;
-    performSearch();
-}
+function filterSearchGenre(name) { const inp = document.getElementById('search-input'); if (!inp) return; inp.value = name; performSearch(); }
 
-/**
- * 4. Сторінка Бібліотеки
- * Фільтрація списку збережених треків за допомогою вкладок.
- */
 function switchLibraryTab(tabName, clickedBtn) {
-    // Візуально перемикаємо активну кнопку вкладки
     if (clickedBtn) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         clickedBtn.classList.add('active');
     }
 
     const songsList = document.getElementById('library-songs-list');
+    if (!songsList) return;
     songsList.innerHTML = '';
 
     let displayedSongs = [];
-    if (tabName === 'all' || tabName === 'playlist') {
-        displayedSongs = songDatabase;
-    } else if (tabName === 'favorites') {
-        // Фільтруємо за масивом обраних треків
-        displayedSongs = songDatabase.filter(s => favoriteTracks.includes(s.id));
-    }
+    if (tabName === 'all' || tabName === 'playlist') displayedSongs = songDatabase;
+    else if (tabName === 'favorites') displayedSongs = songDatabase.filter(s => favoriteTracks.includes(s.id));
 
     if (displayedSongs.length === 0) {
         songsList.innerHTML = '<p style="color: var(--text-muted); padding: 24px; text-align: center;">Тут порожньо.</p>';
@@ -247,20 +218,49 @@ function switchLibraryTab(tabName, clickedBtn) {
 
     displayedSongs.forEach((song, index) => {
         const isFav = favoriteTracks.includes(song.id);
-        songsList.innerHTML += `
-                    <div class="song-row" onclick="playSong('${song.title}', '${song.artist}', '${song.cover}')">
-                        <div class="song-num">${index + 1}</div>
-                        <img class="song-cover" src="${song.cover}" alt="cover"/>
-                        <div class="song-info">
-                            <div class="song-title">${song.title}</div>
-                            <div class="song-artist">${song.artist}</div>
-                        </div>
-                        <div class="song-album">${song.album}</div>
-                        <div class="song-duration">${song.duration}</div>
-                        <button class="song-action-btn" onclick="toggleFavorite(event, this, ${song.id})">
-                            <span class="material-symbols-outlined" style="${isFav ? "font-variation-settings: 'FILL' 1; color: var(--primary-light);" : ""}">favorite</span>
-                        </button>
-                    </div>
-                `;
+        const div = document.createElement('div');
+        div.className = 'song-row';
+        div.innerHTML = `
+            <div class="song-num">${index + 1}</div>
+            <img class="song-cover" src="${song.cover}" alt="cover"/>
+            <div class="song-info">
+                <div class="song-title">${song.title}</div>
+                <div class="song-artist">${song.artist}</div>
+            </div>
+            <div class="song-album">${song.album}</div>
+            <div class="song-duration">${song.duration}</div>
+            <button class="song-action-btn" onclick="toggleFavorite(event, this, ${song.id})">
+                <span class="material-symbols-outlined" style="${isFav ? "font-variation-settings: 'FILL' 1; color: var(--primary-light);" : ""}">favorite</span>
+            </button>
+        `;
+        div.addEventListener('click', () => playSong(song));
+        songsList.appendChild(div);
     });
 }
+
+function renderRecommendedCards() {
+    const container = document.getElementById('tracks-list');
+    if (!container) return;
+    if (container.children.length) return;
+    songDatabase.forEach(s => {
+        const li = document.createElement('li');
+        li.className = 'card';
+        li.innerHTML = `
+            <div class="card-img-wrapper"><img class="card-img" src="${s.cover}"/></div>
+            <div class="card-title">${s.title}</div>
+            <div class="card-subtitle">${s.artist}</div>
+        `;
+        li.addEventListener('click', () => playSong(s));
+        container.appendChild(li);
+    });
+}
+
+function toggleFavorite(event, el, id) {
+    event?.stopPropagation();
+    const trackId = id || (el && el.dataset && Number(el.dataset.id));
+    if (!trackId) return;
+    const idx = favoriteTracks.indexOf(trackId);
+    if (idx === -1) favoriteTracks.push(trackId);
+    else favoriteTracks.splice(idx, 1);
+}
+

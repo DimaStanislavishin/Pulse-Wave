@@ -2,11 +2,9 @@ const appName = "Pulse Wave";
 let apiHost = "https://discoveryprovider.audius.co";
 let activeTracksList = [];
 let currentTrackIndex = -1;
-let audio = null;
 
 // DOM елементи
 let searchInput, searchResultsContainer, searchSongsList, listTitle, tracksListContainer;
-let playerTitle, playerArtist, playerCover, playIcon, progressBar, currentTimeLabel, totalTimeLabel;
 
 // Ініціалізація при завантаженні
 document.addEventListener("DOMContentLoaded", () => {
@@ -19,15 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
     listTitle = document.querySelector("h2.section-title") || document.createElement("h2");
     tracksListContainer = document.getElementById("search-songs-list");
     
-    playerTitle = document.getElementById("current-title");
-    playerArtist = document.getElementById("current-artist");
-    playerCover = document.getElementById("current-cover");
-    playIcon = document.getElementById("play-btn");
-    progressBar = document.getElementById("progress-bar");
-    currentTimeLabel = document.getElementById("current-time");
-    totalTimeLabel = document.getElementById("total-time");
-    
-    audio = createAudioElement();
     
     // Слухаємо введення у пошук
     if (searchInput) {
@@ -49,8 +38,8 @@ function initAudius() {
     fetch("https://api.audius.co")
         .then(response => response.json())
         .then(result => {
-            if (result.data && result.data.length > 0) {
-                apiHost = result.data[0];
+            if (result && result.length > 0) {
+                apiHost = result[0];
             }
             console.log("✅ Audius HOST:", apiHost);
         })
@@ -85,9 +74,11 @@ function searchMusic(query) {
         .then(result => {
             console.log("📥 Результати пошуку:", result);
             
-            if (result.data && result.data.length > 0) {
-                activeTracksList = result.data;
-                displayTracks(result.data);
+            const tracks = Array.isArray(result) ? result : (result.data || []);
+            if (tracks.length > 0) {
+                activeTracksList = tracks;
+                if (typeof window.setTrackList === 'function') window.setTrackList(tracks, 0);
+                displayTracks(tracks);
             } else {
                 searchResultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #dcbfc7;">😢 Нічого не знайдено</div>';
             }
@@ -156,39 +147,6 @@ function displayTracks(tracks) {
     searchResultsContainer.appendChild(songList);
 }
 
-// КРОК 6: Запуск відтворення треку
-function playSong(track) {
-    // Перевіряємо чи у треку є ID
-    if (!track.id) {
-        console.error("❌ Трек не має ID:", track);
-        alert("⚠️ Цей трек не можна відтворити");
-        return;
-    }
-
-    let streamUrl = apiHost + "/v1/tracks/" + track.id + "/stream?app_name=" + appName;
-    let coverUrl = track.artwork ? track.artwork['150x150'] : '';
-
-    console.log("▶️ Грає:", track.title);
-    console.log("🔗 Stream URL:", streamUrl);
-
-    if (playerTitle) playerTitle.innerText = track.title;
-    if (playerArtist) playerArtist.innerText = track.user?.name || 'Невідомий';
-    if (playerCover) playerCover.src = coverUrl || 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&q=80';
-    
-    if (totalTimeLabel) totalTimeLabel.innerText = formatDuration(track.duration);
-    if (progressBar) progressBar.value = 0;
-
-    audio.src = streamUrl;
-    audio.play().catch(error => {
-        console.error("❌ Помилка відтворення:", error);
-        alert("⚠️ Не удалось запустити музику. Спробуйте іншу пісню.");
-    });
-
-    if (playIcon) {
-        playIcon.innerHTML = '<span class="material-symbols-outlined" style="font-variation-settings: \'FILL\' 1;">pause</span>';
-    }
-}
-
 // Допоміжні функції
 function escapeHtml(text) {
     let map = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
@@ -209,69 +167,4 @@ function toggleFavorite(event, button) {
     button.style.color = button.classList.contains("active") ? "#ff6b9d" : "var(--text-muted)";
 }
 
-function togglePlay() {
-    if (!audio) return;
-    
-    let playBtn = document.getElementById("play-btn");
-    
-    if (audio.paused) {
-        audio.play().catch(error => {
-            console.error("❌ Помилка при відтворенні:", error);
-        });
-        if (playBtn) playBtn.innerHTML = '<span class="material-symbols-outlined" style="font-variation-settings: \'FILL\' 1;">pause</span>';
-    } else {
-        audio.pause();
-        if (playBtn) playBtn.innerHTML = '<span class="material-symbols-outlined">play_arrow</span>';
-    }
-}
 
-function seekTrack(value) {
-    if (audio && audio.duration) {
-        audio.currentTime = (value / 100) * audio.duration;
-    }
-}
-
-function changeVolume(value) {
-    if (audio) {
-        audio.volume = value / 100;
-    }
-}
-
-function playNext() {
-    if (activeTracksList.length > 0) {
-        currentTrackIndex = (currentTrackIndex + 1) % activeTracksList.length;
-        playSong(activeTracksList[currentTrackIndex]);
-    }
-}
-
-function playPrevious() {
-    if (activeTracksList.length > 0) {
-        currentTrackIndex = (currentTrackIndex - 1 + activeTracksList.length) % activeTracksList.length;
-        playSong(activeTracksList[currentTrackIndex]);
-    }
-}
-
-function createAudioElement() {
-    let audio = document.createElement("audio");
-    audio.crossOrigin = "anonymous";
-    
-    audio.addEventListener("timeupdate", () => {
-        if (progressBar && audio.duration) {
-            progressBar.value = (audio.currentTime / audio.duration) * 100;
-            if (currentTimeLabel) currentTimeLabel.innerText = formatDuration(audio.currentTime * 1000);
-        }
-    });
-    
-    audio.addEventListener("ended", () => {
-        if (playIcon) playIcon.innerHTML = '<span class="material-symbols-outlined">play_arrow</span>';
-    });
-    
-    return audio;
-}
-
-function switchLibraryTab(tabName, clickedBtn) {
-  // Візуально перемикаємо активну кнопку вкладки
-  if (clickedBtn) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    clickedBtn.classList.add('active');
-  }

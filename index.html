@@ -13,6 +13,7 @@
 
     <link rel="stylesheet" href="index.css" />
 
+    <script src="player.js"></script>
     <script src="index.js"></script>
 </head>
 
@@ -81,6 +82,8 @@
 
             <!-- Сітка рекомендованих карток -->
             <h2 class="section-title">Рекомендовано для вас</h2>
+                <!-- Контейнер для списку треків, заповнюється JS -->
+                <ul id="tracks-list" class="song-list"></ul>
             <div class="grid-layout">
                 <!-- Картка 1 -->
                 <div class="card" onclick="playSong('Electric Moonlight', 'Neon Horizon', 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&q=80')">
@@ -288,5 +291,6 @@
         </div>
     </footer>
 
-    
+    <audio id="audio" preload="metadata"></audio>
+
 </html>
