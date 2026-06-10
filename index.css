@@ -426,16 +426,8 @@ h2.section-title {
   font-size: 14px;
   color: var(--text-muted);
   margin-right: 24px;
-  display: none;
-  /* Сховано на мобільних за замовчуванням */
-}
-
-@media (min-width: 768px) {
-  .song-album {
-    display: block;
-    /* Показуємо на великих екранах */
-    width: 150px;
-  }
+  display: block;
+  width: 150px;
 }
 
 .song-duration {
@@ -645,95 +637,4 @@ footer.player-bar {
   gap: 8px;
   width: 120px;
 }
-
-/* ==========================================================================
-           5. АДАПТИВНІСТЬ (Мобільні екрани)
-           ========================================================================== */
-@media (max-width: 768px) {
-
-  /* Ховаємо бічну панель на телефонах */
-  aside {
-    display: none;
-  }
-
-  main {
-    margin-left: 0;
-    padding: 16px;
-    padding-bottom: 180px;
-    /* Додатковий відступ для двох нижніх панелей */
-  }
-
-  /* Банер на мобільних */
-  .hero-banner {
-    padding: 24px;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .hero-content {
-    max-width: 100%;
-  }
-
-  .hero-img {
-    display: none;
-    /* Ховаємо картинку банера на малих екранах */
-  }
-
-  /* Нижня навігаційна панель для мобільних телефонів */
-  .mobile-nav {
-    position: fixed;
-    bottom: var(--player-height);
-    left: 0;
-    right: 0;
-    height: 64px;
-    background-color: var(--surface-color);
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    z-index: 998;
-  }
-
-  .mobile-nav-btn {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    gap: 4px;
-    cursor: pointer;
-  }
-
-  .mobile-nav-btn.active {
-    color: var(--primary-light);
-  }
-
-  /* Адаптуємо плеєр для маленьких екранів */
-  .player-song-info {
-    width: 50%;
-  }
-
-  .player-controls {
-    width: 50%;
-  }
-
-  .player-actions {
-    display: none;
-    /* Ховаємо гучність на мобільних */
-  }
-
-  .progress-container {
-    display: none;
-    /* Ховаємо прогрес-бар на мобільних */
-  }
-}
-
-/* Настільна версія мобільного меню за замовчуванням схована */
-@media (min-width: 769px) {
-  .mobile-nav {
-    display: none;
-  }
-}
+
