@@ -1,30 +1,23 @@
-const appName = "Pulse Wave";
-let apiHost = "https://discoveryprovider.audius.co";
+const appName = 'Pulse Wave';
+const defaultCoverUrl = 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&q=80';
 
-let activeTracksList = [];
-let searchResultsList = [];
+let apiHost = 'https://discoveryprovider.audius.co';
+let activeTracks = [];
+let searchResults = [];
+let favoriteTracks = [];
+let tracksList = null;
+let heroBanner = null;
+let heroTitle = null;
+let heroDescription = null;
+let heroButton = null;
+let searchInput = null;
+let searchResultsBox = null;
+let genresSection = null;
+let loadMoreButton = null;
+let tracksOffset = 0;
+let tracksLimit = 20;
 
-function getCoverUrl(track) {
-    if (track.artwork && track.artwork['150x150']) {
-        return track.artwork['150x150'];
-    }
-    if (track.cover) {
-        return track.cover;
-    }
-    return 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&q=80';
-}
-
-function getArtistName(track) {
-    if (track.user && track.user.name) {
-        return track.user.name;
-    }
-    if (track.artist) {
-        return track.artist;
-    }
-    return 'Невідомий';
-}
-
-const songDatabase = [
+const localTracks = [
     { id: 1, title: 'Electric Moonlight', artist: 'Neon Horizon', album: 'After Dark', duration: '3:45', genre: 'Електроніка', cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&q=80', stream: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
     { id: 2, title: 'Digital Soul', artist: 'Chrome Static', album: 'The Grid', duration: '4:12', genre: 'Електроніка', cover: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=300&q=80', stream: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' },
     { id: 3, title: 'Rainy Rooftops', artist: 'Lo-fi Echo', album: 'Cozy Vibes', duration: '2:58', genre: 'Лоу-фай', cover: 'https://images.unsplash.com/photo-1515462277126-270d878326e5?w=300&q=80', stream: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' },
@@ -33,405 +26,433 @@ const songDatabase = [
     { id: 6, title: 'Neon Pulse', artist: 'Hyperion Dreams', album: 'Hyperion Dreams', duration: '3:30', genre: 'Поп', cover: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&q=80', stream: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3' }
 ];
 
-let favoriteTracks = [];
-try {
-    const savedFavs = localStorage.getItem('favoriteTracks');
-    if (savedFavs) {
-        favoriteTracks = JSON.parse(savedFavs);
-    }
-} catch (e) {}
+window.appName = appName;
+window.apiHost = apiHost;
+window.localTracks = localTracks;
 
-let tracksListContainer = null;
-let heroBanner = null;
-let heroTitle = null;
-let heroDesc = null;
-let searchInput = null;
-let searchResultsContainer = null;
-let genresSection = null;
+function getSavedFavorites() {
+    try {
+        const saved = localStorage.getItem('favoriteTracks');
 
-document.addEventListener('DOMContentLoaded', function() {
-    tracksListContainer = document.getElementById('tracks-list');
-    heroBanner = document.querySelector('.hero-banner');
-    heroTitle = document.querySelector('.hero-title');
-    heroDesc = document.querySelector('.hero-desc');
-    searchInput = document.getElementById('search-input');
-    searchResultsContainer = document.getElementById('search-results-container');
-    genresSection = document.getElementById('genres-section');
-
-    if (searchInput) {
-        searchInput.addEventListener('input', performSearch);
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                performSearch();
-            }
-        });
-    }
-
-    loadLocalTracks();
-    initAudius();
-    switchLibraryTab('all');
-});
-
-function loadLocalTracks() {
-    activeTracksList = songDatabase.slice();
-    if (typeof window.setTrackList === 'function') {
-        window.setTrackList(activeTracksList, 0);
-    }
-    displayTracks(activeTracksList);
-    updateHeroBanner(activeTracksList);
-}
-
-function loadTrendingTracks() {
-    var url = apiHost + '/v1/tracks/trending?app_name=' + appName + '&limit=10';
-    fetch(url)
-        .then(function(response) {
-            return response.json();
-        })
-        .then(function(result) {
-            var tracks = Array.isArray(result) ? result : (result.data || []);
-            if (tracks.length > 0) {
-                activeTracksList = tracks;
-                if (typeof window.setTrackList === 'function') {
-                    window.setTrackList(tracks, 0);
-                }
-                displayTracks(tracks);
-                updateHeroBanner(tracks);
-            }
-        })
-        .catch(function() {});
-}
-
-function displayTracks(tracks) {
-    if (!tracksListContainer) {
-        return;
-    }
-    tracksListContainer.innerHTML = '';
-    for (let i = 0; i < tracks.length; i++) {
-        const track = tracks[i];
-        const cover = getCoverUrl(track);
-        const artist = getArtistName(track);
-        let duration = track.duration || '';
-        if (typeof duration === 'number') {
-            duration = formatTime(duration);
+        if (saved) {
+            favoriteTracks = JSON.parse(saved);
         }
-        const li = document.createElement('li');
-        li.className = 'song-row';
-        li.style.cursor = 'pointer';
-        li.innerHTML = '<div class="song-num">' + (i + 1) + '</div>' +
-            '<img class="song-cover" src="' + cover + '" alt="cover" />' +
-            '<div class="song-info"><div class="song-title">' + track.title + '</div><div class="song-artist">' + artist + '</div></div>' +
-            '<div class="song-album">' + (track.album || track.genre || '') + '</div>' +
-            '<div class="song-duration">' + duration + '</div>' +
-            '<button class="song-action-btn"><span class="material-symbols-outlined">play_arrow</span></button>';
-        li.addEventListener('click', function() {
-            if (typeof window.setTrackList === 'function') {
-                window.setTrackList(activeTracksList, i);
-            }
-            playSong(track);
-        });
-        tracksListContainer.appendChild(li);
+    } catch (error) {
+        favoriteTracks = [];
     }
 }
 
-function updateHeroBanner(tracks) {
-    if (!tracks || !tracks.length) {
-        return;
-    }
-    const top = tracks[0];
-    const cover = getCoverUrl(top);
-    const artist = getArtistName(top);
-    if (heroTitle) {
-        heroTitle.innerText = top.title;
-    }
-    if (heroDesc) {
-        heroDesc.innerText = 'Найактуальніший хіт від ' + artist;
-    }
-    if (heroBanner && cover) {
-        heroBanner.style.backgroundImage = 'linear-gradient(rgba(27,12,43,0.6), rgba(27,12,43,0.95)), url(' + cover + ')';
+function saveFavorites() {
+    try {
+        localStorage.setItem('favoriteTracks', JSON.stringify(favoriteTracks));
+    } catch (error) {
     }
 }
 
-function initAudius() {
-    fetch('https://api.audius.co')
-        .then(function(response) {
-            return response.json();
-        })
-        .then(function(result) {
-            if (result && result.length > 0) {
-                apiHost = result[Math.floor(Math.random() * result.length)];
-            }
-            loadTrendingTracks();
-        })
-        .catch(function() {
-            loadTrendingTracks();
-        });
-}
-
-function performSearch() {
-    const query = searchInput.value.trim().toLowerCase();
-    if (query === '') {
-        if (searchResultsContainer) searchResultsContainer.style.display = 'none';
-        if (genresSection) genresSection.style.display = 'block';
-        var trendsSection = document.getElementById('trends-section');
-        if (trendsSection) trendsSection.style.display = 'block';
-        return;
-    }
-
-    if (genresSection) genresSection.style.display = 'none';
-    var trendsSection = document.getElementById('trends-section');
-    if (trendsSection) trendsSection.style.display = 'none';
-    if (searchResultsContainer) {
-        searchResultsContainer.style.display = 'block';
-        searchResultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #cbc3da;">⏳ Пошук музики...</div>';
-    }
-
-    const localResults = [];
-    for (let i = 0; i < songDatabase.length; i++) {
-        const song = songDatabase[i];
-        if (song.title.toLowerCase().indexOf(query) !== -1 ||
-            song.artist.toLowerCase().indexOf(query) !== -1 ||
-            (song.genre && song.genre.toLowerCase().indexOf(query) !== -1)) {
-            localResults.push(song);
-        }
-    }
-
-    const url = apiHost + '/v1/tracks/search?query=' + encodeURIComponent(query) + '&app_name=' + appName + '&limit=15';
-    fetch(url)
-        .then(function(response) {
-            return response.json();
-        })
-        .then(function(result) {
-            const globalTracks = Array.isArray(result) ? result : (result.data || []);
-            renderSearchResults(localResults, globalTracks);
-        })
-        .catch(function() {
-            renderSearchResults(localResults, []);
-        });
-}
-
-function quickSearch(keyword) {
-    if (searchInput) {
-        searchInput.value = keyword;
-        performSearch();
-    }
-}
-
-function renderSearchResults(localTracks, globalTracks) {
-    if (!searchResultsContainer) {
-        return;
-    }
-    searchResultsContainer.innerHTML = '';
-    searchResultsList = [];
-
-    if (localTracks.length === 0 && globalTracks.length === 0) {
-        searchResultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #dcbfc7;">😢 Нічого не знайдено.</div>';
-        return;
-    }
-
-    let idx = 0;
-
-    if (localTracks.length > 0) {
-        const h = document.createElement('h3');
-        h.style.cssText = 'margin: 16px 0 8px 0; font-size: 16px; color: #ff6b9d; font-weight: 600;';
-        h.innerText = 'У вашій бібліотеці';
-        searchResultsContainer.appendChild(h);
-
-        const list = document.createElement('div');
-        list.className = 'song-list';
-        for (let i = 0; i < localTracks.length; i++) {
-            const track = localTracks[i];
-            searchResultsList.push(track);
-            list.appendChild(makeSongRow(track, idx + 1, idx));
-            idx++;
-        }
-        searchResultsContainer.appendChild(list);
-    }
-
-    if (globalTracks.length > 0) {
-        const h = document.createElement('h3');
-        h.style.cssText = 'margin: 24px 0 8px 0; font-size: 16px; color: #ff6b9d; font-weight: 600;';
-        h.innerText = 'Результати з мережі';
-        searchResultsContainer.appendChild(h);
-
-        const list = document.createElement('div');
-        list.className = 'song-list';
-        for (let i = 0; i < globalTracks.length; i++) {
-            const track = globalTracks[i];
-            searchResultsList.push(track);
-            list.appendChild(makeSongRow(track, idx + 1, idx));
-            idx++;
-        }
-        searchResultsContainer.appendChild(list);
-    }
-}
-
-function makeSongRow(track, displayNum, playIndex) {
-    let isFav = false;
-    for (let f = 0; f < favoriteTracks.length; f++) {
-        if (String(favoriteTracks[f].id) === String(track.id)) {
-            isFav = true;
-            break;
-        }
-    }
-
-    let coverUrl = 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&q=80';
+function getCoverUrl(track) {
     if (track.artwork && track.artwork['150x150']) {
-        coverUrl = track.artwork['150x150'];
-    } else if (track.cover) {
-        coverUrl = track.cover;
+        return track.artwork['150x150'];
     }
 
-    let artistName = 'Невідомий';
+    if (track.cover) {
+        return track.cover;
+    }
+
+    return defaultCoverUrl;
+}
+
+function getArtistName(track) {
     if (track.user && track.user.name) {
-        artistName = track.user.name;
-    } else if (track.artist) {
-        artistName = track.artist;
+        return track.user.name;
     }
 
-    let durationStr = '0:00';
-    if (typeof track.duration === 'string') {
-        durationStr = track.duration;
-    } else if (typeof track.duration === 'number') {
-        durationStr = formatTime(track.duration);
+    if (track.artist) {
+        return track.artist;
     }
 
-    const row = document.createElement('div');
+    return 'Невідомий';
+}
+
+function getAlbumName(track) {
+    return track.album || track.genre || '';
+}
+
+function formatTrackTime(seconds) {
+    if (typeof seconds === 'string') {
+        return seconds;
+    }
+
+    if (!seconds || isNaN(seconds)) {
+        return '0:00';
+    }
+
+    const minutes = Math.floor(seconds / 60);
+    const restSeconds = Math.floor(seconds % 60);
+
+    if (restSeconds < 10) {
+        return minutes + ':0' + restSeconds;
+    }
+
+    return minutes + ':' + restSeconds;
+}
+
+function isSameTrack(firstTrack, secondTrack) {
+    if (firstTrack.id && secondTrack.id) {
+        return String(firstTrack.id) === String(secondTrack.id);
+    }
+
+    return firstTrack.title === secondTrack.title;
+}
+
+function isFavorite(track) {
+    for (let i = 0; i < favoriteTracks.length; i++) {
+        if (isSameTrack(favoriteTracks[i], track)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function createTextElement(tagName, className, text) {
+    const element = document.createElement(tagName);
+    element.className = className;
+    element.textContent = text;
+    return element;
+}
+
+function createSongRow(track, number, list, index, action) {
+    const rowTag = action === 'play' ? 'li' : 'div';
+    const row = document.createElement(rowTag);
+    const cover = document.createElement('img');
+    const info = document.createElement('div');
+    const button = document.createElement('button');
+    const icon = document.createElement('span');
+
     row.className = 'song-row';
     row.style.cursor = 'pointer';
 
-    const favStyle = isFav ? "font-variation-settings: 'FILL' 1; color: #ff6b9d;" : '';
+    cover.className = 'song-cover';
+    cover.src = getCoverUrl(track);
+    cover.alt = 'cover';
 
-    row.innerHTML = '<div class="song-num">' + displayNum + '</div>' +
-        '<img class="song-cover" src="' + coverUrl + '" alt="cover"/>' +
-        '<div class="song-info">' +
-            '<div class="song-title">' + track.title + '</div>' +
-            '<div class="song-artist">' + artistName + '</div>' +
-        '</div>' +
-        '<div class="song-album">' + (track.genre || track.album || '') + '</div>' +
-        '<div class="song-duration">' + durationStr + '</div>' +
-        '<button class="song-action-btn">' +
-            '<span class="material-symbols-outlined" style="' + favStyle + '">favorite</span>' +
-        '</button>';
+    info.className = 'song-info';
+    info.appendChild(createTextElement('div', 'song-title', track.title || 'Без назви'));
+    info.appendChild(createTextElement('div', 'song-artist', getArtistName(track)));
 
-    const favBtn = row.querySelector('.song-action-btn');
-    favBtn.addEventListener('click', function(event) {
-        toggleFavorite(event, favBtn, track);
-    });
+    icon.className = 'material-symbols-outlined';
+    button.className = 'song-action-btn';
+    button.appendChild(icon);
 
-    row.addEventListener('click', function(e) {
-        if (!e.target.closest('.song-action-btn')) {
-            if (typeof window.setTrackList === 'function') {
-                window.setTrackList(searchResultsList, playIndex);
-            }
-            playSong(track);
+    if (action === 'favorite') {
+        icon.textContent = 'favorite';
+
+        if (isFavorite(track)) {
+            icon.style.fontVariationSettings = "'FILL' 1";
+            icon.style.color = '#ff6b9d';
         }
+
+        button.addEventListener('click', function(event) {
+            toggleFavorite(event, button, track);
+        });
+    } else {
+        icon.textContent = 'play_arrow';
+    }
+
+    row.appendChild(createTextElement('div', 'song-num', number));
+    row.appendChild(cover);
+    row.appendChild(info);
+    row.appendChild(createTextElement('div', 'song-album', getAlbumName(track)));
+    row.appendChild(createTextElement('div', 'song-duration', formatTrackTime(track.duration)));
+    row.appendChild(button);
+
+    row.addEventListener('click', function() {
+        setTrackList(list, index);
+        playSong(track);
     });
 
     return row;
 }
 
-function formatTime(sec) {
-    if (isNaN(sec) || sec < 0) {
-        return '0:00';
+function showTracks(tracks) {
+    tracksList.innerHTML = '';
+    activeTracks = tracks;
+    setTrackList(activeTracks, 0);
+
+    for (let i = 0; i < activeTracks.length; i++) {
+        tracksList.appendChild(createSongRow(activeTracks[i], i + 1, activeTracks, i, 'play'));
     }
-    const minutes = Math.floor(sec / 60);
-    const seconds = Math.floor(sec % 60);
-    const formattedSeconds = seconds < 10 ? '0' + seconds : seconds;
-    return minutes + ':' + formattedSeconds;
 }
 
-function switchLibraryTab(tabName, clickedBtn) {
-    if (clickedBtn) {
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        for (let i = 0; i < tabBtns.length; i++) {
-            tabBtns[i].classList.remove('active');
-        }
-        clickedBtn.classList.add('active');
+function addTracks(tracks) {
+    const oldLength = activeTracks.length;
+
+    for (let i = 0; i < tracks.length; i++) {
+        activeTracks.push(tracks[i]);
+        tracksList.appendChild(createSongRow(tracks[i], oldLength + i + 1, activeTracks, oldLength + i, 'play'));
     }
 
-    const songsList = document.getElementById('library-songs-list');
-    if (!songsList) {
-        return;
-    }
-    songsList.innerHTML = '';
+    setTrackList(activeTracks, 0);
+}
 
-    let displayedSongs = [];
-    if (tabName === 'all' || tabName === 'playlist') {
-        displayedSongs = songDatabase;
-    } else if (tabName === 'favorites') {
-        displayedSongs = favoriteTracks;
-    }
-
-    if (displayedSongs.length === 0) {
-        songsList.innerHTML = '<p style="color: var(--text-muted); padding: 24px; text-align: center;">Тут порожньо 😢</p>';
+function updateHero(track) {
+    if (!track) {
         return;
     }
 
-    for (let i = 0; i < displayedSongs.length; i++) {
-        const song = displayedSongs[i];
+    heroTitle.textContent = track.title || '';
+    heroDescription.textContent = 'Найактуальніший хіт від ' + getArtistName(track);
+    heroBanner.style.backgroundImage = 'linear-gradient(rgba(27,12,43,0.6), rgba(27,12,43,0.95)), url(' + getCoverUrl(track) + ')';
 
-        let isFav = false;
-        for (let f = 0; f < favoriteTracks.length; f++) {
-            if (String(favoriteTracks[f].id) === String(song.id)) {
-                isFav = true;
-                break;
-            }
-        }
-
-        let coverUrl = 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=300&q=80';
-        if (song.artwork && song.artwork['150x150']) {
-            coverUrl = song.artwork['150x150'];
-        } else if (song.cover) {
-            coverUrl = song.cover;
-        }
-
-        let artistName = 'Невідомий';
-        if (song.user && song.user.name) {
-            artistName = song.user.name;
-        } else if (song.artist) {
-            artistName = song.artist;
-        }
-
-        let durationStr = '0:00';
-        if (typeof song.duration === 'string') {
-            durationStr = song.duration;
-        } else if (typeof song.duration === 'number') {
-            durationStr = formatTime(song.duration);
-        }
-
-        const favStyle = isFav ? "font-variation-settings: 'FILL' 1; color: #ff6b9d;" : '';
-
-        const div = document.createElement('div');
-        div.className = 'song-row';
-        div.style.cursor = 'pointer';
-        div.innerHTML = '<div class="song-num">' + (i + 1) + '</div>' +
-            '<img class="song-cover" src="' + coverUrl + '" alt="cover"/>' +
-            '<div class="song-info">' +
-                '<div class="song-title">' + song.title + '</div>' +
-                '<div class="song-artist">' + artistName + '</div>' +
-            '</div>' +
-            '<div class="song-album">' + (song.album || song.genre || '') + '</div>' +
-            '<div class="song-duration">' + durationStr + '</div>' +
-            '<button class="song-action-btn">' +
-                '<span class="material-symbols-outlined" style="' + favStyle + '">favorite</span>' +
-            '</button>';
-
-        const favBtn = div.querySelector('.song-action-btn');
-        favBtn.addEventListener('click', function(event) {
-            toggleFavorite(event, favBtn, song);
-        });
-
-        div.addEventListener('click', function(event) {
-            if (!event.target.closest('.song-action-btn')) {
-                if (typeof window.setTrackList === 'function') {
-                    window.setTrackList(displayedSongs, i);
-                }
-                playSong(song);
-            }
-        });
-        songsList.appendChild(div);
+    if (heroButton) {
+        heroButton.onclick = function() {
+            setTrackList(activeTracks, 0);
+            playSong(track);
+        };
     }
+}
+
+function getTracksFromApiResult(result) {
+    if (Array.isArray(result)) {
+        return result;
+    }
+
+    if (result && Array.isArray(result.data)) {
+        return result.data;
+    }
+
+    return [];
+}
+
+async function loadApiHost() {
+    try {
+        const response = await fetch('https://api.audius.co');
+        const hosts = await response.json();
+
+        if (hosts.length > 0) {
+            apiHost = hosts[Math.floor(Math.random() * hosts.length)];
+            window.apiHost = apiHost;
+        }
+    } catch (error) {
+    }
+}
+
+async function loadTrendingTracks() {
+    try {
+        tracksOffset = 0;
+        const url = apiHost + '/v1/tracks/trending?app_name=' + encodeURIComponent(appName) + '&limit=' + tracksLimit + '&offset=' + tracksOffset;
+        const response = await fetch(url);
+        const result = await response.json();
+        const tracks = getTracksFromApiResult(result);
+
+        if (tracks.length > 0) {
+            showTracks(tracks);
+            updateHero(tracks[0]);
+            tracksOffset = tracksOffset + tracks.length;
+        }
+    } catch (error) {
+    }
+}
+
+async function loadMoreTracks() {
+    if (!loadMoreButton) {
+        return;
+    }
+
+    loadMoreButton.disabled = true;
+    loadMoreButton.textContent = 'Завантаження...';
+
+    try {
+        const url = apiHost + '/v1/tracks/trending?app_name=' + encodeURIComponent(appName) + '&limit=' + tracksLimit + '&offset=' + tracksOffset;
+        const response = await fetch(url);
+        const result = await response.json();
+        const tracks = getTracksFromApiResult(result);
+
+        if (tracks.length > 0) {
+            addTracks(tracks);
+            tracksOffset = tracksOffset + tracks.length;
+            loadMoreButton.disabled = false;
+            loadMoreButton.textContent = 'Показати більше';
+        } else {
+            loadMoreButton.style.display = 'none';
+        }
+    } catch (error) {
+        loadMoreButton.disabled = false;
+        loadMoreButton.textContent = 'Показати більше';
+    }
+}
+
+function showSearchBlocks(showSearch) {
+    const trendsSection = document.getElementById('trends-section');
+
+    if (showSearch) {
+        searchResultsBox.style.display = 'block';
+        genresSection.style.display = 'none';
+
+        if (trendsSection) {
+            trendsSection.style.display = 'none';
+        }
+    } else {
+        searchResultsBox.style.display = 'none';
+        genresSection.style.display = 'block';
+
+        if (trendsSection) {
+            trendsSection.style.display = 'block';
+        }
+    }
+}
+
+function searchLocalTracks(query) {
+    const foundTracks = [];
+
+    for (let i = 0; i < localTracks.length; i++) {
+        const track = localTracks[i];
+        const title = track.title.toLowerCase();
+        const artist = track.artist.toLowerCase();
+        const genre = track.genre.toLowerCase();
+
+        if (title.includes(query) || artist.includes(query) || genre.includes(query)) {
+            foundTracks.push(track);
+        }
+    }
+
+    return foundTracks;
+}
+
+async function searchApiTracks(query) {
+    try {
+        const url = apiHost + '/v1/tracks/search?query=' + encodeURIComponent(query) + '&app_name=' + encodeURIComponent(appName) + '&limit=15';
+        const response = await fetch(url);
+        const result = await response.json();
+        return getTracksFromApiResult(result);
+    } catch (error) {
+        return [];
+    }
+}
+
+async function performSearch() {
+    const query = searchInput.value.trim().toLowerCase();
+
+    if (query === '') {
+        showSearchBlocks(false);
+        return;
+    }
+
+    showSearchBlocks(true);
+    searchResultsBox.innerHTML = '<div style="padding: 20px; text-align: center; color: #cbc3da;">Пошук музики...</div>';
+
+    const localResults = searchLocalTracks(query);
+    const apiResults = await searchApiTracks(query);
+
+    showSearchResults(localResults, apiResults);
+}
+
+function addSearchTitle(text) {
+    const title = document.createElement('h3');
+    title.style.cssText = 'margin: 16px 0 8px 0; font-size: 16px; color: #ff6b9d; font-weight: 600;';
+    title.textContent = text;
+    searchResultsBox.appendChild(title);
+}
+
+function addSearchList(tracks) {
+    const list = document.createElement('div');
+    list.className = 'song-list';
+
+    for (let i = 0; i < tracks.length; i++) {
+        searchResults.push(tracks[i]);
+        list.appendChild(createSongRow(tracks[i], searchResults.length, searchResults, searchResults.length - 1, 'favorite'));
+    }
+
+    searchResultsBox.appendChild(list);
+}
+
+function showSearchResults(localResults, apiResults) {
+    searchResults = [];
+    searchResultsBox.innerHTML = '';
+
+    if (localResults.length === 0 && apiResults.length === 0) {
+        searchResultsBox.innerHTML = '<div style="padding: 20px; text-align: center; color: #dcbfc7;">Нічого не знайдено.</div>';
+        return;
+    }
+
+    if (localResults.length > 0) {
+        addSearchTitle('У вашій бібліотеці');
+        addSearchList(localResults);
+    }
+
+    if (apiResults.length > 0) {
+        addSearchTitle('Результати з мережі');
+        addSearchList(apiResults);
+    }
+}
+
+function quickSearch(keyword) {
+    searchInput.value = keyword;
+    performSearch();
+}
+
+function setActiveLibraryTab(tabName) {
+    const buttons = document.querySelectorAll('.tab-btn');
+    let activeIndex = 0;
+
+    if (tabName === 'playlist') {
+        activeIndex = 1;
+    }
+
+    if (tabName === 'favorites') {
+        activeIndex = 2;
+    }
+
+    for (let i = 0; i < buttons.length; i++) {
+        buttons[i].classList.remove('active');
+    }
+
+    if (buttons[activeIndex]) {
+        buttons[activeIndex].classList.add('active');
+    }
+}
+
+function switchLibraryTab(tabName) {
+    const libraryList = document.getElementById('library-songs-list');
+    let tracks = localTracks;
+
+    setActiveLibraryTab(tabName);
+    libraryList.innerHTML = '';
+
+    if (tabName === 'favorites') {
+        tracks = favoriteTracks;
+    }
+
+    if (tracks.length === 0) {
+        libraryList.innerHTML = '<p style="color: var(--text-muted); padding: 24px; text-align: center;">Тут порожньо</p>';
+        return;
+    }
+
+    for (let i = 0; i < tracks.length; i++) {
+        libraryList.appendChild(createSongRow(tracks[i], i + 1, tracks, i, 'favorite'));
+    }
+}
+
+function findTrackInRow(button) {
+    const row = button.closest('.song-row');
+
+    if (!row) {
+        return null;
+    }
+
+    const title = row.querySelector('.song-title');
+
+    if (!title) {
+        return null;
+    }
+
+    for (let i = 0; i < localTracks.length; i++) {
+        if (localTracks[i].title === title.textContent) {
+            return localTracks[i];
+        }
+    }
+
+    return null;
 }
 
 function toggleFavorite(event, button, track) {
@@ -439,58 +460,73 @@ function toggleFavorite(event, button, track) {
         event.stopPropagation();
     }
 
-    let trackToSave = track;
+    const selectedTrack = track || findTrackInRow(button);
 
-    if (!trackToSave) {
-        const row = button.closest('.song-row');
-        if (row) {
-            const titleEl = row.querySelector('.song-title');
-            if (titleEl) {
-                for (let i = 0; i < songDatabase.length; i++) {
-                    if (songDatabase[i].title === titleEl.textContent) {
-                        trackToSave = songDatabase[i];
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    if (!trackToSave) {
+    if (!selectedTrack) {
         return;
     }
 
-    let foundIdx = -1;
+    const icon = button.querySelector('span');
+    let favoriteIndex = -1;
+
     for (let i = 0; i < favoriteTracks.length; i++) {
-        if (String(favoriteTracks[i].id) === String(trackToSave.id)) {
-            foundIdx = i;
-            break;
+        if (isSameTrack(favoriteTracks[i], selectedTrack)) {
+            favoriteIndex = i;
         }
     }
 
-    const span = button.querySelector('span');
-    if (foundIdx > -1) {
-        favoriteTracks.splice(foundIdx, 1);
-        if (span) {
-            span.style.fontVariationSettings = '';
-            span.style.color = '';
-        }
-        const activeTab = document.querySelector('.tab-btn.active');
-        if (activeTab && activeTab.textContent.trim() === 'Улюблені') {
-            switchLibraryTab('favorites');
+    if (favoriteIndex === -1) {
+        favoriteTracks.push(selectedTrack);
+
+        if (icon) {
+            icon.style.fontVariationSettings = "'FILL' 1";
+            icon.style.color = '#ff6b9d';
         }
     } else {
-        favoriteTracks.push(trackToSave);
-        if (span) {
-            span.style.fontVariationSettings = "'FILL' 1";
-            span.style.color = '#ff6b9d';
+        favoriteTracks.splice(favoriteIndex, 1);
+
+        if (icon) {
+            icon.style.fontVariationSettings = '';
+            icon.style.color = '';
         }
     }
 
-    try {
-        localStorage.setItem('favoriteTracks', JSON.stringify(favoriteTracks));
-    } catch (e) {}
+    saveFavorites();
+
+    const activeTab = document.querySelector('.tab-btn.active');
+
+    if (activeTab && activeTab.textContent.trim() === 'Улюблені') {
+        switchLibraryTab('favorites');
+    }
 }
+
+async function startApp() {
+    tracksList = document.getElementById('tracks-list');
+    heroBanner = document.querySelector('.hero-banner');
+    heroTitle = document.querySelector('.hero-title');
+    heroDescription = document.querySelector('.hero-desc');
+    heroButton = document.querySelector('.btn-play-hero');
+    searchInput = document.getElementById('search-input');
+    searchResultsBox = document.getElementById('search-results-container');
+    genresSection = document.getElementById('genres-section');
+    loadMoreButton = document.getElementById('load-more-tracks');
+
+    getSavedFavorites();
+    showTracks(localTracks);
+    updateHero(localTracks[0]);
+    switchLibraryTab('all');
+
+    searchInput.addEventListener('input', performSearch);
+
+    if (loadMoreButton) {
+        loadMoreButton.addEventListener('click', loadMoreTracks);
+    }
+
+    await loadApiHost();
+    await loadTrendingTracks();
+}
+
+document.addEventListener('DOMContentLoaded', startApp);
 
 window.performSearch = performSearch;
 window.quickSearch = quickSearch;
