@@ -54,7 +54,7 @@
                 <div class="hero-content">
                     <span class="hero-tag">НОВИЙ РЕЛІЗ</span>
                     <h1 class="hero-title">Neon Pulse</h1>
-                    <p class="hero-desc">Відчуйте новий вимір електронної музики. Альбом "Hyperion Dreams" вже доступний у високій якості.</p>
+                    <p class="hero-desc">Відчуйте новий вимір електронної музики. Альбом "Hyperion Dreams" вже доступний у високій як[...]</p>
                     <button class="btn-play-hero" onclick="playSong('Neon Pulse')">
                         <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
                         Слухати зараз
@@ -281,6 +281,93 @@
     </footer>
 
     <audio id="audio" preload="metadata"></audio>
+
+
+<!-- ==================== MOBILE TOP NAV (appended) ==================== -->
+
+<div id="mobile-top-nav" class="mobile-top-nav" aria-hidden="true">
+  <nav class="mobile-nav" role="navigation" aria-label="Mobile main navigation">
+    <button class="mobile-nav-btn" data-target="home" aria-label="Головна"><span class="material-symbols-outlined">home</span><span class="mobile-nav-text">Головна</span></button>
+    <button class="mobile-nav-btn" data-target="search" aria-label="Пошук"><span class="material-symbols-outlined">search</span><span class="mobile-nav-text">Пошук</span></button>
+    <button class="mobile-nav-btn" data-target="library" aria-label="Бібліотека"><span class="material-symbols-outlined">library_music</span><span class="mobile-nav-text">Бібліотека</span></button>
+  </nav>
+</div>
+
+<style>
+/* Mobile top nav styles (appended only) */
+#mobile-top-nav { display: none; position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: 56px; background: var(--surface-color); border-bottom: 1px solid rgba(255,255,255,0.03); z-index: 950; display: flex; align-items: center; padding: 6px 8px; }
+.mobile-nav { display: flex; gap: 8px; width: 100%; justify-content: flex-start; overflow: hidden; }
+.mobile-nav-btn { background: none; border: none; color: var(--text-muted); display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; font-weight: 600; font-size: 13px; cursor: pointer; white-space: nowrap; max-width: 120px; text-overflow: ellipsis; overflow: hidden; }
+.mobile-nav-btn .material-symbols-outlined { font-size: 20px; }
+.mobile-nav-btn.active { color: #fff; background: linear-gradient(90deg, var(--primary-color), #854dff); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+.mobile-nav-text { display: inline-block; max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* When extremely narrow, hide text to avoid overflow */
+@media (max-width: 420px) {
+  .mobile-nav-text { display: none; }
+  .mobile-nav-btn { padding: 8px; }
+}
+
+/* Show mobile nav only on small screens and keep layout spacing */
+@media (max-width: 600px) {
+  #mobile-top-nav { left: var(--sidebar-width); display: flex; }
+  main { padding-top: 64px; }
+}
+
+/* If sidebar is collapsed (very small), align top nav to left 0 */
+@media (max-width: 360px) {
+  :root { --sidebar-width: 64px; }
+  #mobile-top-nav { left: var(--sidebar-width); }
+}
+</style>
+
+<script>
+// Mobile top nav behavior (appended only)
+(function(){
+  function updateMobileNavVisibility() {
+    const nav = document.getElementById('mobile-top-nav');
+    if (!nav) return;
+    if (window.innerWidth <= 600) {
+      nav.style.display = 'flex';
+      nav.setAttribute('aria-hidden', 'false');
+    } else {
+      nav.style.display = 'none';
+      nav.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  function syncActiveState() {
+    const asideActive = document.querySelector('aside nav .nav-btn.active');
+    const activeTarget = asideActive ? (asideActive.getAttribute('onclick') || '').match(/'([^']+)'/) : null;
+    const targetName = activeTarget ? activeTarget[1] : null;
+    document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.target === targetName);
+    });
+  }
+
+  function attachHandlers() {
+    document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+      btn.addEventListener('click', function(event){
+        const t = btn.dataset.target;
+        // call existing navigateTo if available
+        if (typeof navigateTo === 'function') {
+          navigateTo(t, event);
+        }
+        // mark active on mobile and aside
+        document.querySelectorAll('.mobile-nav-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        // sync aside nav buttons
+        document.querySelectorAll('aside nav .nav-btn').forEach(nb=>{
+          nb.classList.toggle('active', (nb.getAttribute('onclick') || '').includes("'"+t+"'"));
+        });
+      });
+    });
+  }
+
+  window.addEventListener('resize', function(){ updateMobileNavVisibility(); syncActiveState(); });
+  document.addEventListener('DOMContentLoaded', function(){ updateMobileNavVisibility(); attachHandlers(); syncActiveState(); });
+})();
+</script>
 
 </body>
 
