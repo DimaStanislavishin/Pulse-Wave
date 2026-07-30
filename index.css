@@ -959,3 +959,47 @@ footer.player-bar {
   /* small polish: ensure icons/text don't wrap */
   #mobile-top-nav, #mobile-top-nav .mobile-nav-btn { white-space: nowrap !important; }
 }
+
+/* Force show and style horizontal volume slider on mobile */
+@media (max-width: 600px) {
+  /* убедимся, что правый блок видим */
+  footer.player-bar .player-actions { display: flex !important; visibility: visible !important; }
+
+  /* volume container must be horizontal and visible */
+  .volume-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: auto !important;
+    min-width: 64px !important;
+    padding-left: 4px !important;
+  }
+
+  /* make sure the input (slider) is horizontal and visible */
+  .volume-controls input[type="range"],
+  .volume-controls .slider {
+    display: block !important;
+    width: 72px !important;     /* ширина ползунка */
+    height: 4px !important;
+    -webkit-appearance: none !important;
+    transform: none !important;
+    margin: 0 !important;
+    background: rgba(255,255,255,0.12) !important;
+    border-radius: 4px !important;
+  }
+
+  .volume-controls input[type="range"]::-webkit-slider-thumb,
+  .volume-controls .slider::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    width: 12px !important;
+    height: 12px !important;
+    border-radius: 50% !important;
+    background: var(--primary-light) !important;
+  }
+
+  /* если какой-то rule поворачивает ползунок — отменяем */
+  .volume-controls input[type="range"], .volume-controls .slider { transform: none !important; writing-mode: horizontal-tb !important; }
+
+  /* гарантия, что иконки справа остаются видимыми и не перекрывают ползунок */
+  .player-actions { gap: 10px !important; align-items: center !important; }
+}
