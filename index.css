@@ -1387,3 +1387,23 @@ footer.player-bar, .player-actions, .volume-controls { z-index: 9999; }
 
 /* Optional: if the slider sits inside a rounded container that clips it, remove clip */
 footer.player-bar * { overflow: visible !important; }
+
+/* Tighten footer after removing volume control */
+@media (max-width: 600px) {
+  footer.player-bar {
+    display: grid !important;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px !important;
+    height: 72px !important;
+  }
+
+  .player-song-info { grid-column: 1; min-width: 0; gap: 8px; }
+  .player-text { display: none !important; } /* экономим место */
+
+  .player-controls { grid-column: 2; justify-self: center; }
+  .control-buttons { gap: 10px !important; }
+
+  .player-actions { grid-column: 3; justify-self: end; display:flex; gap: 8px !important; align-items:center; padding-right: calc(8px + env(safe-area-inset-right)); }
+}
