@@ -861,3 +861,101 @@ footer.player-bar {
     padding-top: 0 !important;
   }
 }
+
+/* === Mobile player: horizontal evenly-spaced controls (phones) === */
+@media (max-width: 600px) {
+  /* make footer a 3-column grid: left (cover), center (controls), right (actions) */
+  footer.player-bar {
+    display: grid !important;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px !important;
+    height: 76px !important;
+  }
+
+  /* left: cover (keep small) */
+  .player-song-info {
+    grid-column: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+  .player-cover {
+    width: 48px !important;
+    height: 48px !important;
+    margin-right: 8px !important;
+  }
+  /* hide track text on very small screens to save space */
+  .player-text { display: none !important; }
+
+  /* center: main controls (prev / play / next) */
+  .player-controls {
+    grid-column: 2;
+    justify-self: center;
+    width: auto !important;
+    padding: 0 !important;
+  }
+
+  /* arrange control buttons horizontally and evenly */
+  .control-buttons {
+    display: flex !important;
+    gap: 18px !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* make touch targets equal size and comfortable */
+  .control-btn {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    padding: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* larger circular play button in center */
+  .control-btn.btn-play {
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: 50% !important;
+  }
+
+  /* hide long progress bar on mobile (optional) */
+  .progress-container { display: none !important; }
+
+  /* right: actions (queue, list, volume) */
+  .player-actions {
+    grid-column: 3;
+    justify-self: end;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+
+  /* volume controls: horizontal small slider like desktop */
+  .volume-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: auto !important;
+  }
+  .volume-controls .material-symbols-outlined { font-size: 18px !important; }
+
+  /* force horizontal slider and size it appropriately */
+  .volume-controls input[type="range"] {
+    width: 64px !important;
+    height: 4px !important;
+    -webkit-appearance: none !important;
+    transform: none !important; /* prevent any accidental rotation */
+  }
+  .volume-controls input[type="range"]::-webkit-slider-thumb {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  /* small polish: ensure icons/text don't wrap */
+  #mobile-top-nav, #mobile-top-nav .mobile-nav-btn { white-space: nowrap !important; }
+}
