@@ -1334,3 +1334,56 @@ footer.player-bar {
   .volume-controls input[type="range"], .volume-controls .slider { -webkit-appearance: none !important; transform: none !important; }
   footer.player-bar { z-index: 999; }
 }
+
+/* ----- Ensure player fits on iPhone X / safe-area ----- */
+
+/* Use safe-area insets for padding so controls are not hidden behind rounded corners */
+footer.player-bar {
+  padding-left: calc(8px + env(safe-area-inset-left)) !important;
+  padding-right: calc(8px + env(safe-area-inset-right)) !important;
+  overflow: visible !important; /* allow popups / sliders to be visible */
+  box-sizing: border-box;
+}
+
+/* Right column may need extra right padding so slider isn't clipped */
+.player-actions {
+  padding-right: env(safe-area-inset-right, 8px) !important;
+  overflow: visible !important;
+}
+
+/* Default mobile compact slider (guarantee visible) */
+@media (max-width: 420px) {
+  .volume-controls .slider,
+  .volume-controls input[type="range"] {
+    display: block !important;
+    width: 48px !important;      /* small but tappable */
+    height: 4px !important;
+    margin-right: 2px !important;
+    margin-left: 2px !important;
+    -webkit-appearance: none !important;
+    transform: none !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+  }
+
+  /* make sure the volume icon and controls don't push slider off-screen */
+  .player-actions { gap: 6px !important; }
+  .control-buttons { gap: 8px !important; }
+  .control-btn { min-width: 30px !important; min-height: 30px !important; }
+  .control-btn.btn-play { width: 40px !important; height: 40px !important; }
+}
+
+/* Even tighter for narrow screens (iPhone X ~ 375px width) */
+@media (max-width: 390px) {
+  .volume-controls .slider,
+  .volume-controls input[type="range"] { width: 44px !important; }
+  .player-cover { width: 36px !important; height: 36px !important; }
+  .control-btn.btn-play { width: 44px !important; height: 44px !important; }
+  footer.player-bar { padding-left: calc(6px + env(safe-area-inset-left)); padding-right: calc(6px + env(safe-area-inset-right)); }
+}
+
+/* Fallback: ensure nothing hides due to border-radius */
+footer.player-bar, .player-actions, .volume-controls { z-index: 9999; }
+
+/* Optional: if the slider sits inside a rounded container that clips it, remove clip */
+footer.player-bar * { overflow: visible !important; }
