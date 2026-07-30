@@ -773,3 +773,91 @@ footer.player-bar {
 
 /* Small tweak: if top nav is visible, increase its z so it sits above content */
 #mobile-top-nav { z-index: 1100; }
+
+
+/* Force mobile top nav to be horizontal, left-aligned and non-wrapping */
+#mobile-top-nav {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 56px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding: 6px 10px !important;
+  background: var(--surface-color) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.03) !important;
+  z-index: 1200 !important;
+  overflow: hidden;
+}
+
+/* The inner container should be a single horizontal row with horizontal scroll if needed */
+#mobile-top-nav .mobile-nav {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding-left: 6px !important;
+}
+
+/* Buttons inline, prevent them from becoming column */
+#mobile-top-nav .mobile-nav-btn {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  gap: 8px !important;
+  white-space: nowrap !important;
+  padding: 8px 10px !important;
+  min-height: 44px !important;
+  border-radius: 10px !important;
+  color: var(--text-muted) !important;
+  background: none !important;
+  max-width: 160px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Icons and text inline */
+#mobile-top-nav .mobile-nav-btn .material-symbols-outlined {
+  font-size: 20px !important;
+  line-height: 1 !important;
+}
+#mobile-top-nav .mobile-nav-text {
+  display: inline-block !important;
+  max-width: 96px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Hide text on very small screens, keep icons */
+@media (max-width: 420px) {
+  #mobile-top-nav .mobile-nav-text { display: none !important; }
+  #mobile-top-nav { height: 52px !important; padding: 6px 6px !important; }
+  #mobile-top-nav .mobile-nav-btn { padding: 8px !important; }
+}
+
+/* Ensure content is not hidden behind top nav */
+@media (max-width: 1000px) {
+  main { margin-left: 0 !important; padding-top: 72px !important; }
+}
+
+/* Скрывать мобильную верхнюю панель на десктопе и вернуть боковую панель */
+@media (min-width: 1001px) {
+  /* Скрываем мобильный top nav, даже если он установлен inline-стилем */
+  #mobile-top-nav {
+    display: none !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+  }
+
+  /* Восстанавливаем отступы для main (чтобы бренд/контент не были подложены) */
+  main {
+    margin-left: var(--sidebar-width) !important;
+    padding-top: 0 !important;
+  }
+}
