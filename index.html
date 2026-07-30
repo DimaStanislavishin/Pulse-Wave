@@ -459,6 +459,135 @@
 })();
 </script>
 
+<script>
+(function(){
+  const AUDIO_ID = 'audio';
+  let popup = null;
+
+  function createPopup() {
+    popup = document.createElement('div');
+    popup.className = 'volume-popup';
+    popup.innerHTML = '<input class="volume-vertical" type="range" min="0" max="100" step="1" />';
+    document.body.appendChild(popup);
+
+    // stop clicks from closing immediately
+    popup.addEventListener('click', e => e.stopPropagation());
+    // close on Escape
+    document.addEventListener('keydown', onKeyDown);
+    window.addEventListener('resize', removePopup);
+
+    const slider = popup.querySelector('.volume-vertical');
+    slider.addEventListener('input', onSliderInput);
+    slider.addEventListener('touchstart', e => e.stopPropagation(), {passive:true});
+  }
+
+  function onKeyDown(e){
+    if (e.key === 'Escape') removePopup();
+  }
+
+  function removePopup(){
+    if (!popup) return;
+    const slider = popup.querySelector('.volume-vertical');
+    if (slider) slider.removeEventListener('input', onSliderInput);
+    document.removeEventListener('keydown', onKeyDown);
+    window.removeEventListener('resize', removePopup);
+    popup.remove();
+    popup = null;
+  }
+
+  function onSliderInput(e) {
+    const raw = Number(e.target.value); // this is rotated value
+    // because we rotated the input, we invert so that moving UP increases volume
+    const computed = Math.max(0, Math.min(100, 100 - raw));
+    const audio = document.getElementById(AUDIO_ID);
+    if (audio) audio.volume = computed / 100;
+    // (keep visual position in sync if audio changed elsewhere)
+  }
+
+  function togglePopupForButton(btn) {
+    if (popup) {
+      removePopup();
+      return;
+    }
+    createPopup();
+    positionPopupNearButton(btn);
+    // initialize slider value from audio.volume
+    const audio = document.getElementById(AUDIO_ID);
+    const slider = popup.querySelector('.volume-vertical');
+    const audioVol = audio ? Math.round((audio.volume || 0.75) * 100) : 75;
+    // because slider is rotated and we invert, set slider.value = 100 - audioVol
+    slider.value = (100 - audioVol).toString();
+  }
+
+  function positionPopupNearButton(btn) {
+    if (!popup || !btn) return;
+    const rect = btn.getBoundingClientRect();
+    const popupW = popup.offsetWidth;
+    const popupH = popup.offsetHeight;
+    // prefer showing above button; if not enough space, show below
+    const margin = 8;
+    let top = rect.top - popupH - margin;
+    if (top < 8) {
+      // not enough space above — show below
+      top = rect.bottom + margin;
+    }
+    let left = rect.left + (rect.width / 2) - (popupW / 2);
+    // clamp to viewport
+    left = Math.max(8, Math.min(left, window.innerWidth - popupW - 8));
+    popup.style.top = Math.round(top) + 'px';
+    popup.style.left = Math.round(left) + 'px';
+  }
+
+  // attach toggle to your volume button(s)
+  function attachHandler() {
+    // try find volume button (looks for material icon 'volume_up' or any .control-btn that contains that)
+    const candidates = Array.from(document.querySelectorAll('.player-actions .control-btn, .player-actions button'));
+    let volBtn = null;
+    for (const c of candidates) {
+      const icon = c.querySelector('.material-symbols-outlined');
+      if (icon && /volume_up|volume_down|volume_mute/.test(icon.textContent.trim())) {
+        volBtn = c;
+        break;
+      }
+      // or check title/aria-label
+      if ((c.getAttribute('aria-label')||'').toLowerCase().includes('volume')) {
+        volBtn = c;
+        break;
+      }
+    }
+
+    if (!volBtn) {
+      // if not found, create fallback: find last control-btn in .player-actions
+      const actions = document.querySelector('.player-actions');
+      if (actions) volBtn = actions.querySelector('button.control-btn:last-child') || actions.querySelector('button');
+    }
+    if (!volBtn) return;
+
+    volBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      togglePopupForButton(volBtn);
+    });
+
+    // close popup when clicking outside
+    document.addEventListener('click', function(){
+      if (popup) removePopup();
+    });
+
+    // recompute position on scroll (so popup stays near button)
+    window.addEventListener('scroll', function(){
+      if (popup) {
+        // find button bounding again and reposition
+        positionPopupNearButton(volBtn);
+      }
+    }, {passive:true});
+  }
+
+  document.addEventListener('DOMContentLoaded', attachHandler);
+  // also try again shortly because some UI might render later
+  setTimeout(attachHandler, 700);
+})();
+</script>
+
 </body>
 
 </html>
