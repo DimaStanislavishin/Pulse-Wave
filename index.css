@@ -1272,3 +1272,65 @@ footer.player-bar {
   /* небольшая дополнительная гарантия: не даём элементам переноситься */
   footer.player-bar *, #mobile-top-nav, #mobile-top-nav .mobile-nav-btn { white-space: nowrap !important; }
 }
+
+/* Compact player: progressively tighten spacing on very small screens */
+
+/* Base mobile (<=600px) already set earlier. Below — дополнительные сжатия */
+@media (max-width: 420px) {
+  footer.player-bar {
+    padding: 6px 6px !important;
+    height: 68px !important;
+    grid-template-columns: auto 1fr auto;
+    gap: 6px !important;
+  }
+
+  .control-buttons { gap: 10px !important; }
+  .control-btn { min-width: 34px !important; min-height: 34px !important; }
+  .control-btn.btn-play { width: 46px !important; height: 46px !important; }
+
+  .player-cover { width: 40px !important; height: 40px !important; }
+  .player-text { display: none !important; }
+
+  .player-actions { gap: 6px !important; }
+
+  .volume-controls { gap: 6px !important; }
+  .volume-controls .slider,
+  .volume-controls input[type="range"] {
+    width: 52px !important;
+  }
+}
+
+/* Even tighter for narrow phones (approx. iPhone X width ~375px) */
+@media (max-width: 390px) {
+  footer.player-bar { padding: 5px 6px !important; height: 64px !important; gap: 4px !important; }
+  .control-buttons { gap: 8px !important; }
+  .control-btn { min-width: 32px !important; min-height: 32px !important; padding: 4px !important; }
+  .control-btn.btn-play { width: 44px !important; height: 44px !important; }
+
+  .player-cover { width: 36px !important; height: 36px !important; }
+  .volume-controls .slider,
+  .volume-controls input[type="range"] { width: 48px !important; }
+}
+
+/* Very narrow (older phones) */
+@media (max-width: 360px) {
+  footer.player-bar { padding: 4px 6px !important; height: 60px !important; gap: 3px !important; }
+  .control-buttons { gap: 6px !important; }
+  .control-btn { min-width: 30px !important; min-height: 30px !important; }
+  .control-btn.btn-play { width: 40px !important; height: 40px !important; }
+
+  .player-cover { width: 32px !important; height: 32px !important; }
+  .volume-controls .slider,
+  .volume-controls input[type="range"] { width: 44px !important; }
+
+  /* Make sure slider is visible and tappable */
+  .volume-controls input[type="range"] { display:block !important; opacity: 1 !important; pointer-events: auto !important; }
+}
+
+/* Safety: keep elements on one line, and ensure slider not hidden */
+@media (max-width: 420px) {
+  footer.player-bar *, .player-actions, .control-buttons, .volume-controls { white-space: nowrap !important; }
+  .volume-controls { align-items: center !important; }
+  .volume-controls input[type="range"], .volume-controls .slider { -webkit-appearance: none !important; transform: none !important; }
+  footer.player-bar { z-index: 999; }
+}
