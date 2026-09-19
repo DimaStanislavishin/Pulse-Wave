@@ -14,6 +14,7 @@ let trackList = [];
 let trackIndex = 0;
 let shuffleEnabled = false;
 let repeatEnabled = false;
+let currentTrack = null;
 
 function getPlayerApiHost() {
     return window.apiHost || defaultApiHost;
@@ -182,9 +183,17 @@ function playSong(track) {
         return;
     }
 
+    currentTrack = foundTrack;
     updatePlayer(foundTrack);
     audio.src = streamUrl;
     playCurrentAudio();
+
+    // Повідомляємо інші частини сайту (наприклад, вікно тексту), що трек змінився
+    window.dispatchEvent(new CustomEvent('trackchange', { detail: foundTrack }));
+}
+
+function getCurrentTrack() {
+    return currentTrack;
 }
 
 function togglePlay() {
@@ -394,3 +403,4 @@ window.setTrackList = setTrackList;
 window.navigateTo = navigateTo;
 window.toggleShuffle = toggleShuffle;
 window.toggleRepeat = toggleRepeat;
+window.getCurrentTrack = getCurrentTrack;

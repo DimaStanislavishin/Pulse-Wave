@@ -1,5 +1,3 @@
-
-
 /* RESPONSIVE STYLES: Mobile & Tablet optimizations */
 
 :root {
@@ -1406,4 +1404,418 @@ footer.player-bar * { overflow: visible !important; }
   .control-buttons { gap: 10px !important; }
 
   .player-actions { grid-column: 3; justify-self: end; display:flex; gap: 8px !important; align-items:center; padding-right: calc(8px + env(safe-area-inset-right)); }
+}
+
+/* ==========================================================================
+           5. ВІКНО ТЕКСТУ ПІСНІ (Lyrics)
+           ========================================================================== */
+
+/* Кнопка у плеєрі, поки вікно відкрите (той самий рожевий, що й у shuffle / repeat) */
+#lyrics-btn.active {
+  color: #ff6b9d;
+}
+
+#lyrics-btn.active .material-symbols-outlined {
+  font-variation-settings: 'FILL' 1;
+}
+
+#lyrics-btn:focus-visible,
+.lyrics-close:focus-visible,
+.lyrics-retry:focus-visible {
+  outline: 2px solid var(--primary-light);
+  outline-offset: 2px;
+}
+
+/* Затемнений фон. Знизу залишаємо місце, щоб плеєр лишався доступним */
+.lyrics-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 24px calc(var(--player-height) + 24px);
+  background: rgba(19, 19, 20, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  /* При закритті приховуємо (visibility) лише після зникнення, щоб анімація була плавною */
+  transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+}
+
+.lyrics-overlay.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  /* При відкритті елемент має стати видимим одразу, інакше на нього не можна перевести фокус */
+  transition: opacity 0.25s ease, visibility 0s;
+}
+
+/* Саме вікно: той самий градієнт і рамка, що й у hero-banner */
+.lyrics-window {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 760px;
+  height: 100%;
+  max-height: 720px;
+  background: linear-gradient(135deg, #1d0f3a 0%, #0c051a 100%);
+  border: 1px solid rgba(107, 33, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  transform: translateY(16px);
+  transition: transform 0.25s ease;
+}
+
+.lyrics-overlay.open .lyrics-window {
+  transform: translateY(0);
+}
+
+/* Розмита обкладинка поточного треку як м'яке світіння фону */
+.lyrics-window::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  left: -40px;
+  right: -40px;
+  bottom: -40px;
+  background-image: var(--lyrics-cover);
+  background-size: cover;
+  background-position: center;
+  filter: blur(48px) saturate(1.4);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Затемнення поверх обкладинки, щоб текст завжди добре читався */
+.lyrics-window::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(12, 5, 26, 0.6), rgba(12, 5, 26, 0.92));
+  pointer-events: none;
+}
+
+.lyrics-header,
+.lyrics-body,
+.lyrics-footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* Шапка вікна */
+.lyrics-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.lyrics-cover {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.lyrics-cover[hidden],
+.lyrics-badge[hidden] {
+  display: none;
+}
+
+.lyrics-meta {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.lyrics-title {
+  font-size: 20px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lyrics-artist {
+  font-size: 14px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lyrics-badge {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: var(--primary-color);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.lyrics-badge.is-plain {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+}
+
+.lyrics-close {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.lyrics-close:hover {
+  color: var(--text-main);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Область з текстом (прокручується). Краї плавно розчиняються */
+.lyrics-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 32px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 48px, #000 calc(100% - 48px), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 48px, #000 calc(100% - 48px), transparent 100%);
+}
+
+.lyrics-lines {
+  flex-shrink: 0;
+}
+
+/* Порожній простір зверху й знизу, щоб перший та останній рядки могли стати по центру */
+.lyrics-lines.is-synced::before,
+.lyrics-lines.is-synced::after {
+  content: '';
+  display: block;
+  height: 35vh;
+}
+
+.lyrics-lines.is-plain {
+  padding: 56px 0;
+}
+
+.lyrics-line {
+  padding: 10px 0;
+  color: var(--text-muted);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.3;
+  opacity: 0.65;
+  overflow-wrap: anywhere;
+  transform-origin: left center;
+  transition: opacity 0.3s ease, color 0.3s ease, transform 0.3s ease, text-shadow 0.3s ease;
+}
+
+.lyrics-lines.is-synced .lyrics-line {
+  cursor: pointer;
+}
+
+.lyrics-lines.is-synced .lyrics-line:not(.is-active):hover {
+  color: var(--text-main);
+  opacity: 0.9;
+}
+
+.lyrics-line.is-gap {
+  font-size: 24px;
+}
+
+.lyrics-line.is-past {
+  opacity: 0.45;
+}
+
+/* Рядок, який виконується зараз */
+.lyrics-line.is-active {
+  color: #fff;
+  opacity: 1;
+  transform: scale(1.03);
+  text-shadow: 0 0 28px rgba(107, 33, 255, 0.75);
+}
+
+/* Текст без часових міток: спокійне читання без підсвічування */
+.lyrics-lines.is-plain .lyrics-line {
+  padding: 3px 0;
+  color: var(--text-main);
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.5;
+  opacity: 0.9;
+}
+
+.lyrics-lines.is-plain .lyrics-line.is-blank {
+  height: 22px;
+  padding: 0;
+}
+
+/* Стани: завантаження, помилка, порожньо */
+.lyrics-status {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.lyrics-status .material-symbols-outlined {
+  margin-bottom: 8px;
+  font-size: 48px;
+  color: var(--primary-light);
+  opacity: 0.8;
+}
+
+.lyrics-status-title {
+  color: var(--text-main);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.lyrics-status-text {
+  max-width: 340px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.lyrics-spinner {
+  animation: lyricsSpin 1s linear infinite;
+}
+
+@keyframes lyricsSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.lyrics-retry {
+  margin-top: 16px;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 50px;
+  background-color: #fff;
+  color: #000;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.lyrics-retry:hover {
+  transform: scale(1.04);
+}
+
+/* Нижній рядок: підказка та джерело текстів */
+.lyrics-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.lyrics-footer a {
+  color: var(--primary-light);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.lyrics-footer a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* Телефони: вікно на всю ширину */
+@media (max-width: 600px) {
+  .lyrics-overlay {
+    padding: 0 0 var(--player-height);
+  }
+
+  .lyrics-window {
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .lyrics-header {
+    padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 14px;
+    gap: 12px;
+  }
+
+  .lyrics-cover {
+    width: 44px;
+    height: 44px;
+  }
+
+  .lyrics-title {
+    font-size: 16px;
+  }
+
+  .lyrics-body {
+    padding: 0 20px;
+  }
+
+  .lyrics-line {
+    font-size: 22px;
+  }
+
+  .lyrics-line.is-gap {
+    font-size: 20px;
+  }
+
+  .lyrics-lines.is-plain .lyrics-line {
+    font-size: 17px;
+  }
+
+  .lyrics-footer {
+    padding: 10px 16px;
+  }
+}
+
+/* Повага до налаштування "зменшити рухи" */
+@media (prefers-reduced-motion: reduce) {
+  .lyrics-overlay,
+  .lyrics-overlay.open,
+  .lyrics-window,
+  .lyrics-line {
+    transition: none;
+  }
+
+  .lyrics-spinner {
+    animation: none;
+  }
 }
