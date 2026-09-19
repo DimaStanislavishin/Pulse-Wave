@@ -186,9 +186,9 @@ function playSong(track) {
     currentTrack = foundTrack;
     updatePlayer(foundTrack);
     audio.src = streamUrl;
+    updateProgress();
     playCurrentAudio();
 
-    // Повідомляємо інші частини сайту (наприклад, вікно тексту), що трек змінився
     window.dispatchEvent(new CustomEvent('trackchange', { detail: foundTrack }));
 }
 
@@ -262,9 +262,20 @@ function playPrevious() {
     playSong(trackList[trackIndex]);
 }
 
+function updateProgressVisual(value) {
+    if (!progressBar) {
+        return;
+    }
+
+    const percentage = Math.max(0, Math.min(100, Number(value) || 0));
+    progressBar.value = percentage;
+    progressBar.style.background = 'linear-gradient(to right, var(--primary-light) 0%, var(--primary-light) ' + percentage + '%, rgba(255, 255, 255, 0.1) ' + percentage + '%, rgba(255, 255, 255, 0.1) 100%)';
+}
+
 function seekTrack(value) {
-    if (audio && audio.duration) {
+    if (audio && isFinite(audio.duration) && audio.duration > 0) {
         audio.currentTime = audio.duration * (Number(value) / 100);
+        updateProgress();
     }
 }
 
@@ -301,17 +312,23 @@ function toggleRepeat() {
 }
 
 function updateProgress() {
-    if (audio && audio.duration) {
-        progressBar.value = (audio.currentTime / audio.duration) * 100;
-        totalTimeText.textContent = formatPlayerTime(audio.duration);
+    if (!audio) {
+        return;
     }
 
-    if (audio) {
-        currentTimeText.textContent = formatPlayerTime(audio.currentTime);
-    }
+    const duration = isFinite(audio.duration) && audio.duration > 0
+        ? audio.duration
+        : (currentTrack && Number(currentTrack.duration)) || 0;
+    const currentTime = isFinite(audio.currentTime) ? audio.currentTime : 0;
+    const percentage = duration > 0 ? (currentTime / duration) * 100 : 0;
+
+    updateProgressVisual(percentage);
+    currentTimeText.textContent = formatPlayerTime(currentTime);
+    totalTimeText.textContent = formatPlayerTime(duration);
 }
 
 function onSongEnded() {
+    updateProgressVisual(100);
     updatePlayIcon();
 
     if (repeatEnabled) {
@@ -385,9 +402,15 @@ function initializePlayer() {
     }
 
     audio.addEventListener('timeupdate', updateProgress);
+    audio.addEventListener('loadedmetadata', updateProgress);
+    audio.addEventListener('durationchange', updateProgress);
+    audio.addEventListener('seeked', updateProgress);
+    audio.addEventListener('play', updatePlayIcon);
+    audio.addEventListener('pause', updatePlayIcon);
     audio.addEventListener('ended', onSongEnded);
 
     changeVolume(75);
+    updateProgress();
     updatePlayIcon();
 }
 
